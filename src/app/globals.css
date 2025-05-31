@@ -1,0 +1,83 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html{
+    scroll-behavior: smooth;
+}
+
+.testimonial-swiper .swiper-pagination{
+    position: static;
+}
+
+.testimonial-swiper .swiper-pagination-bullet-active{
+    background: #ff9900 !important;
+}
+
+.hide-scrollbar {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE 10+ */
+  }
+  
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+  }
+
+  .image_details{
+    height: 25rem;
+  }
+
+  .image_details img{
+    width: 100%;
+    height: 100%;
+  }
+.listing_p{
+    padding-top: 7rem;
+}
+  @media (max-width: 550px) {
+    .listing_p{
+        padding-top: 0;
+    }
+  }
+
+  .max-w-7xl {
+max-width: 90%;
+
+  }
+
+  .fontsclass{
+    font-size: 12px !important;
+  }
+
+  .paddingnull{
+    padding: 10px 15px 10px 15px !important;
+    margin: 5px 10px 5px 10px !important;
+  }
+
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;     /* Firefox */
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;             /* Safari and Chrome */
+  }
+
+
+
+  .marginttopa{
+    margin-top: -100px;
+  }
+
+  .imagesize {
+    width: 33%;
+    height: 140px;
+  }
+  
+  @media (max-width: 640px) {
+    .imagesize {
+      width: 100%;
+      height: 200px;
+    }
+  }
+  

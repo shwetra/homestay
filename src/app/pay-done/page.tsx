@@ -6,17 +6,14 @@ import Image from 'next/image'
 import { useSearchParams } from 'next/navigation'; 
 export interface PayPageProps {}
 
-const PayPage: FC<PayPageProps> = () => {
-	const searchParams = useSearchParams();
-
-  const trx = searchParams.get('trx');
-  const first_name = searchParams.get('first_name');
-  const last_name = searchParams.get('last_name');
-  const start_date = searchParams.get('start_date');
-  const guest = searchParams.get('guest');
-  const package_price = searchParams.get('package_price');
-  const package_name = searchParams.get('package_name');
-
+export default function PayPage({ searchParams }: { searchParams: Record<string, string> }) {
+	const trx = searchParams.trx;
+	const first_name = searchParams.first_name;
+	const last_name = searchParams.last_name;
+	const start_date = searchParams.start_date;
+	const guest = searchParams.guest;
+	const package_price = searchParams.package_price;
+	const package_name = searchParams.package_name;
 	const renderContent = () => {
 		return (
 			<div className="flex w-full flex-col space-y-10 px-0 sm:rounded-2xl sm:p-6 xl:p-8">
@@ -157,4 +154,4 @@ const PayPage: FC<PayPageProps> = () => {
 	)
 }
 
-export default PayPage
+

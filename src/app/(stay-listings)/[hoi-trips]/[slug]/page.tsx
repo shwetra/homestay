@@ -361,8 +361,8 @@ const HoiTripsDetails = () => {
           <>
             <div className="listingSectionSidebar__wrap shadow-xl mt-[6rem] sm:mt-0">
                     {/* PRICE */}
-                    <div className="flex justify-between">
-                      <span className="text-xl font-semibold">
+                  <div className="flex justify-between">
+					          <span className="text-xl font-semibold">
                        
                         ₹{sideBarHoiTrips?.price}
                         <span className="ml-1 text-base font-normal text-neutral-500 dark:text-neutral-400">
@@ -378,10 +378,10 @@ const HoiTripsDetails = () => {
                           setStartDate={setStartDate}
                           hoitripdates={sideBarHoiTrips?.hoitripdates}
                           pricePackage={sideBarHoiTrips?.price}
-                          
+                          className="z-[11] flex-1"
                           />
                         <div className="w-full border-b border-neutral-200 dark:border-neutral-700"></div>
-                        	<GuestsInput onTotalChange={setGuestTotal}/>
+                        	<GuestsInput onTotalChange={setGuestTotal} className="flex-1"/>
                           </div>
                           
                             <div className="grid grid-cols-1 gap-6 sm:grid-cols-1 mt-5">

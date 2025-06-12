@@ -6,7 +6,9 @@ import { useImages } from "@/app/contextApi/ImageContext";
 import { useLocation } from "react-use";
 import StayCard2Copy from "@/components/StayCard2Copy";
 import StayCard2 from "@/components/StayCard2";
+// import Heading1 from "@/shared/heading1";
 import Heading2 from "@/shared/Heading2";
+import Heading1 from "@/shared/Heading1";
 import SkeletonLoader3 from "@/components/skeleton/SkeletonLoader3";
 import { slice } from "lodash";
 import ButtonPrimary from "@/shared/ButtonPrimary";
@@ -80,6 +82,11 @@ const ListingStayPage: FC<ListingStayPageProps> = () => {
 
   
   // convert state name to valid syntax 
+  	const formatName = (name: string) => {
+  return name
+    .replace(/-/g, ' ')                      // Replace dashes with spaces
+    .replace(/\b\w/g, char => char.toUpperCase()); // Capitalize first letter of each word
+};
   const renderState = (state: any): string => {
     if (!state) return "";
     return state.replace(/%20/g, " ") // Replace %20 with space
@@ -111,7 +118,8 @@ const ListingStayPage: FC<ListingStayPageProps> = () => {
       className={`nc-SectionGridFilterCard container pb-24 lg:pb-28`}
       data-nc-id="SectionGridFilterCard"
     >
-      <Heading2 heading={`Stays in ${renderState(state)}`} />
+      <Heading1 heading= {`Stays in ${formatName(renderState(state))}`} />
+      
 
       {hasAnyProperties ?
 

@@ -91,7 +91,7 @@ const Header3: FC<Header3Props> = ({ className = '' }) => {
 			  "x-api-key": process.env.NEXT_PUBLIC_X_API_KEY, 
 			},
 		  })
-		  console.log(data,"jhasdjk")
+		 
 		  if (data.status === 'success') {
 		  	setMenuItem(data?.data)
 		  }

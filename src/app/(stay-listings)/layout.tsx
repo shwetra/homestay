@@ -1,3 +1,4 @@
+'use client';
 import BackgroundSection from "@/components/BackgroundSection";
 import BgGlassmorphism from "@/components/BgGlassmorphism";
 import SectionGridAuthorBox from "@/components/SectionGridAuthorBox";
@@ -5,10 +6,12 @@ import SectionSliderNewCategories from "@/components/SectionSliderNewCategories"
 import SectionSubscribe2 from "@/components/SectionSubscribe2";
 import React, { ReactNode } from "react";
 import SectionHeroArchivePage from "../(server-components)/SectionHeroArchivePage";
-
+import { usePathname } from 'next/navigation';
 const Layout = ({ children }: { children: ReactNode }) => {
+  const pathname = usePathname();
+  const isTripPage = pathname.startsWith('/hoitrips/');
   return (
-    <div className={`nc-ListingStayPage relative pt-[5rem]`}>
+     <div className={`nc-ListingStayPage relative ${isTripPage ? 'pt-[0rem]' : 'pt-[5rem]'}`}>
       <BgGlassmorphism />
 
       {/* SECTION HERO */}

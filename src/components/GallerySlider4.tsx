@@ -14,22 +14,20 @@ export interface GallerySliderProps {
     galleryImgs: any //(StaticImageData | string)[] 
     ratioClass?: string
     uniqueID: string
-    href?: any //Route<string>
+    // href?: any //Route<string>
     imageClass?: string
     galleryClass?: string
     navigation?: boolean
-    coverPhoto: any
 }
 
-export default function GallerySlider2({
+export default function GallerySlider4({
     className = '',
     galleryImgs,
-    coverPhoto,
     ratioClass = 'aspect-w-4 aspect-h-3',
     imageClass = '',
     uniqueID = 'uniqueID',
     galleryClass = 'rounded-xl',
-    href = '/listing-stay-detail',
+    // href = '/listing-stay-detail',
     navigation = true,
 }: any) {
     const [loaded, setLoaded] = useState(false)
@@ -60,15 +58,8 @@ export default function GallerySlider2({
     }
 
     // Initialize images outside any condition
-    // const images = galleryImgs
-    const images = (() => {
-    if (!Array.isArray(galleryImgs)) return [];
+    const images = galleryImgs
 
-    const cover = galleryImgs.find((img: any) => img.cover_photo === 1);
-    const others = galleryImgs.filter((img: any) => img !== cover);
-
-    return cover ? [cover, ...others] : galleryImgs;
-})();
     // Change photo function
     function changePhotoId(newVal: number) {
         if (newVal > index) {
@@ -80,11 +71,8 @@ export default function GallerySlider2({
     }
 
     // let currentImage = images[index]?.image_url
-    // let currentImage = typeof images[index] === 'string' ? images[index] : images[index]?.image_url;
-let currentImage =
-    typeof images[index] === 'string'
-        ? images[index]
-        : images[index]?.image_url;
+    let currentImage = typeof images[index] === 'string' ? images[index] : images[index]?.image_url;
+
 
     return (
         <MotionConfig
@@ -99,10 +87,11 @@ let currentImage =
             >
                 {/* Main image */}
                 <div className={`w-full overflow-hidden ${galleryClass}`}>
-                    <Link
+                    {/* <Link
                         href={href}
                         className={`relative flex items-center justify-center ${ratioClass}`}
-                    >
+                    > */}
+                    <div className={`relative flex items-center justify-center ${ratioClass}`}>
                         <AnimatePresence initial={false} custom={direction}>
                             <motion.div
                                 key={index}
@@ -123,7 +112,8 @@ let currentImage =
                                 />
                             </motion.div>
                         </AnimatePresence>
-                    </Link>
+                    {/* </Link> */}
+                    </div>
                 </div>
 
                 {/* Buttons + bottom nav bar */}

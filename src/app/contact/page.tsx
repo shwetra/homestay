@@ -163,10 +163,28 @@ const nav=useRouter()
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
+   if (name === 'mobile') {
+  const onlyDigits = value.replace(/\D/g, ''); // Keep only digits
+
+  if (onlyDigits.startsWith('0')) {
+        if (onlyDigits.length <= 11) {
+          setFormData((prev) => ({ ...prev, [name]: onlyDigits }));
+        }
+      } else {
+        if (onlyDigits.length <= 10) {
+          setFormData((prev) => ({ ...prev, [name]: onlyDigits }));
+        }
+      }
+    }
+ else if (name === 'fullname') {
+          const onlyAlphabets = value.replace(/[^a-zA-Z\s]/g, ''); // allow letters and spaces
+          setFormData((prev) => ({ ...prev, [name]: onlyAlphabets }));
+        }
+      else{
     setFormData((prev) => ({
       ...prev,
       [name]: value,
-    }))
+    }))}
   }
 
   const handleSubmit =async (e: FormEvent) => {

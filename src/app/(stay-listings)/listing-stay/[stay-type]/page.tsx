@@ -5,6 +5,7 @@ import { useImages } from "@/app/contextApi/ImageContext";
 import { useLocation } from "react-use";
 import StayCard2 from "@/components/StayCard2";
 import Heading2 from "@/shared/Heading2";
+import Heading1 from "@/shared/Heading1";
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react'
 import StayCard2Copy from "@/components/StayCard2Copy";
 import SkeletonLoader3 from "@/components/skeleton/SkeletonLoader3";
@@ -132,7 +133,7 @@ const ListingStayPage: FC<ListingStayPageProps> = () => {
                 className="nc-SectionGridFilterCard container pb-24 lg:pb-28"
                 data-nc-id="SectionGridFilterCard"
             >
-                <Heading2 heading={`Stays in ${state || "your location"}`} />
+                <Heading1 heading={`Stays in ${state || "your location"}`} />
 
                 <SkeletonLoader3 className="h-[300px] rounded-lg" />
 
@@ -147,7 +148,7 @@ const ListingStayPage: FC<ListingStayPageProps> = () => {
                 className="nc-SectionGridFilterCard container pb-24 lg:pb-28"
                 data-nc-id="SectionGridFilterCard"
             >
-                <Heading2 heading={`Stays in ${state || "your location"}`} />
+                <Heading1 heading={`Stays in ${state || "your location"}`} />
 
                 {hasAnyProperties ?
 
@@ -160,10 +161,10 @@ const ListingStayPage: FC<ListingStayPageProps> = () => {
                                         <Tab
                                             key={name}
                                             className="rounded-full py-1 px-3 text-sm/6 font-semibold 
-                       text-black dark:text-white 
-                       focus:outline-none 
-                       data-[selected]:bg-black/10 dark:data-[selected]:bg-white/10 
-                       data-[hover]:bg-black/5 dark:data-[hover]:bg-white/5"
+                                            text-black dark:text-white 
+                                            focus:outline-none 
+                                            data-[selected]:bg-black/10 dark:data-[selected]:bg-white/10 
+                                            data-[hover]:bg-black/5 dark:data-[hover]:bg-white/5"
                                         >
                                             {name}
                                         </Tab>

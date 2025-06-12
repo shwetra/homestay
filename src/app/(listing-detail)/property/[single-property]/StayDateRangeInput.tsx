@@ -181,7 +181,7 @@ const StayDatesRangeInput: FC<StayDatesRangeInputProps> = ({
 													</div>
 												)}
 											</div>
-										);
+										);	
 									}}
 								/>
 							</div>

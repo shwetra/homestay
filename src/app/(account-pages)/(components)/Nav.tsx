@@ -20,6 +20,7 @@ export const Nav = () => {
 			<div className="hiddenScrollbar flex space-x-8 overflow-x-auto md:space-x-14">
 				{listNav.map((item) => {
 					const isActive = pathname === item
+					
 					return (
 						<Link
 							key={item}

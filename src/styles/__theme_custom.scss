@@ -1,7 +1,9 @@
 .root {
   overflow: hidden;
 }
-
+.z-neg-1 {
+  z-index: -1;
+}
 #headlessui-portal-root {
   @apply text-neutral-900 dark:text-neutral-200 text-base;
 }

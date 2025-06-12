@@ -4,7 +4,7 @@ import React, { FC, useState } from 'react'
 import Image from 'next/image'
 import axios from 'axios'
 import { toast } from 'react-toastify'
-
+import { useRouter } from 'next/navigation'
 import { GuestsObject } from '../(client-components)/type'
 import { useImages } from '../contextApi/ImageContext'
 
@@ -65,7 +65,7 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
 }) => {
   const [starttDate, setStartDate] = useState<Date | null>(startDate || null)
   const [enddDate, setEndDate] = useState<Date | null>(endDate || null)
-
+  const router = useRouter();
   const { loggedUser } = useImages()
 
   const [guests, setGuests] = useState<{
@@ -82,7 +82,7 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
   const totleguests = guestAdultsInputValue + guestChildrenInputValue + guestInfantsInputValue
 
   const roomsid = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('selectedRoom') || 'null') : null
-
+ 
   const [formData, setFormData] = useState({
     first_name: '',
     last_name: '',
@@ -110,7 +110,26 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
+      if (name === 'phone') {
+    const onlyDigits = value.replace(/\D/g, ''); // Remove non-digit characters
+   if (onlyDigits.startsWith('0')) {
+        if (onlyDigits.length <= 11) {
+          setFormData((prev) => ({ ...prev, [name]: onlyDigits }));
+        }
+      } else {
+        if (onlyDigits.length <= 10) {
+          setFormData((prev) => ({ ...prev, [name]: onlyDigits }));
+        }
+      }
+      }
+        else if (name === 'first_name' || name === 'last_name') {
+          const onlyAlphabets = value.replace(/[^a-zA-Z\s]/g, ''); // allow letters and spaces
+          setFormData((prev) => ({ ...prev, [name]: onlyAlphabets }));
+        }
+      else {
+        setFormData((prev) => ({ ...prev, [name]: value }));
+      }
+    
   }
 
   const renderSidebar = () => (
@@ -234,7 +253,7 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
         return;
       }
       toast.success('Reservation submitted successfully!');
-
+      router.push('/pay-done');
     } catch (error: any) {
       console.error('Error (Failure):', error.response?.data?.message || error.message);
     }

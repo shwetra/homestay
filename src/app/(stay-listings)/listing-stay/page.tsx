@@ -4,6 +4,7 @@ import SectionGridFilterCard from "../SectionGridFilterCard";
 import axios from "axios";
 import { useImages } from "@/app/contextApi/ImageContext";
 import Heading2 from "@/shared/Heading2";
+import Heading1 from "@/shared/Heading1";
 import SkeletonLoader3 from "@/components/skeleton/SkeletonLoader3";
 
 export interface ListingStayPageProps {}
@@ -43,7 +44,7 @@ if (loading) {
       className="nc-SectionGridFilterCard container pb-24 lg:pb-28"
       data-nc-id="SectionGridFilterCard"
     >
-      <Heading2 heading={`Stays in India`} />
+      <Heading1 heading={`Stays in India`} />
 
       <SkeletonLoader3 className="h-[300px] rounded-lg" />
 

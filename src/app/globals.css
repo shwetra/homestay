@@ -5,7 +5,8 @@
 html{
     scroll-behavior: smooth;
 }
-
+.customListedStyle ul{list-style:disc; margin-left:16px;}
+.customListedStyle ol{margin-left:16px; list-style:decimal; }
 .testimonial-swiper .swiper-pagination{
     position: static;
 }

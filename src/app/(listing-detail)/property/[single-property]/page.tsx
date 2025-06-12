@@ -318,9 +318,9 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ }) => {
 				</div> */}
 
 				{/* 2 */}
-				<h2 className="text-2xl flex gap-2 font-semibold sm:text-3xl lg:text-4xl">
+				<h1 className="text-4xl flex gap-2 font-semibold sm:text-3xl lg:text-4xl">
 					{result?.name}
-				</h2>
+				</h1>
 
 				{/* 3 */}
 				<div className="flex items-center space-x-4">
@@ -328,8 +328,8 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ }) => {
 						<MapPinIcon className="h-5 w-5" />
 						{/* <span className="ml-1">  {result?.property_address?.address_line_1}</span> */}
 						<span className="ml-1">
-  {result?.property_address?.address_line_1?.split(',').slice(1).join(',').trim()}
-</span>
+  					{result?.property_address?.address_line_1?.split(',').slice(1).join(',').trim()}
+				</span>
 
 					</div>
 				</div>
@@ -518,6 +518,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ }) => {
 	const renderSection3 = ({ amenities }: any) => {
 
 		return (
+			<>
 			<div className="listingSection__wrap">
 				<div>
 					<h2 className="text-2xl font-semibold">Facilities </h2>
@@ -550,7 +551,37 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ }) => {
 					</ButtonSecondary>
 				</div>
 				{renderModalAmenities()}
+				{amenities?.Inclusive.length > 0 && (
+					<>
+						<h2 className="text-2xl font-semibold">Inclusive</h2>
+						<div className="flex gap-5 flex-wrap">
+						{amenities.Inclusive.map((item: any) => (
+							<div key={item.id} className="flex items-center space-x-3">
+							<strong className="text-[1.5rem] text-gray-500">&bull;</strong>
+							<span>{item.title}</span>
+							</div>
+						))}
+						</div>
+					</>
+					)}
+					{amenities?.Exclusive.length > 0 && (
+						<>
+				<h2 className="text-2xl font-semibold">Exclusive </h2>
+				<div className="flex gap-5 flex-wrap">
+					{amenities?.Exclusive?.map((item: any)  => (
+						<div key={item.id} className="flex items-center space-x-3">
+						
+							<strong className='text-[1.5rem] text-gray-500'>&bull;</strong>
+							<span>{item.title}</span>
+						</div>
+					))}
+				</div>
+				</>
+					)}
 			</div>
+			
+			
+			</>
 		)
 	}
 
@@ -616,6 +647,27 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ }) => {
 						<div key={item.id} className="flex items-center space-x-3">
 							<strong className='text-[1.5rem] text-gray-500'>&bull;</strong>
 							<span className=" ">{item.title}</span>
+						</div>
+					))}
+				</div>
+			</div>
+		)
+	}
+	const renderInclusive = ({ allNewAmenities }: any) => {
+		console.log("inclusive =", allNewAmenities )
+		return (
+			<div className="listingSection__wrap">
+				<div>
+					<h2 className="text-2xl font-semibold">Inclusive</h2>
+				
+				</div>
+				{/* 6 */}
+				<div className="flex gap-5 flex-wrap">
+					{allNewAmenities?.Inclusive?.map((item: any) => (
+						<div key={item.id} className="flex items-center space-x-3">
+							<strong className='text-[1.5rem] text-gray-500'>&bull;</strong>
+							<span className=" ">{item.title}</span>
+							
 						</div>
 					))}
 				</div>
@@ -812,7 +864,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ }) => {
 
 					Up to 6 years: Complimentary (no extra bed) <br/>
 
-7-12 years.: 50% (with extra bed)
+7-12 years : 50% (with extra bed)
 				</div>
 			</div>
 		)
@@ -1377,7 +1429,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ }) => {
 			{/* MAIN */}
 			<main className={`relative ${activeModal == null ? 'z-10' : 'z-40'} mt-11 flex flex-col lg:flex-row`}>
 				{/* CONTENT */}
-				<div className="w-full space-y-8 lg:w-3/5 lg:space-y-10 lg:pr-10 xl:w-2/3">
+				<div className="w-full space-y-8 lg:w-3/5 xl:w-2/3 lg:space-y-5 lg:pr-10 overflow-y-auto h-full">
 					{renderSection1({ result })}
 					{rooms?.length > 0 && renderRoomSection({ rooms })}
 					<SectionDateRange
@@ -1395,6 +1447,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ }) => {
 					{description?.about_place != null && renderSection9()}
 					{renderSection3({ amenities })}
 					{amenities?.SafetyAmenities.length > 0 && renderSafetyAmenities({ amenities })}
+					{/* {allNewAmenities && renderInclusive({ allNewAmenities })} */}
 					{/* {renderSection4()} */}
 					{renderSection10()}
 					{description?.guestsactivity?.length > 0 && renderSection11({ description })}
@@ -1408,7 +1461,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ }) => {
 
 				{/* SIDEBAR */}
 				<div className="mt-14 flex-grow lg:mt-0 lg:block" id='sidebarr'>
-					<div className="relative top-0">{renderSidebar({ result })}</div>
+					<div className="sticky top-24">{renderSidebar({ result })}</div>
 				</div>
 
 				{/* mobile sidebar  */}

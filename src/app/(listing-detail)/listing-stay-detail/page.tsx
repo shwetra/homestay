@@ -631,7 +631,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({}) => {
 							<li>
 								Up to 6 years: Complimentary (no extra bed)
 							</li>
-							<li>7-12 years.: 50% (with extra bed)</li>
+							<li>7-12 years : 50% (with extra bed)</li>
 						</ul>
 					</div>
 					<br />

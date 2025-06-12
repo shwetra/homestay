@@ -1,7 +1,7 @@
 'use client'
 import React, { FC, useCallback, useEffect, useState } from 'react'
 import GallerySlider from '@/components/GallerySlider'
-import GallerySlider2 from '@/components/GallerySlider2'
+	import GallerySlider2 from '@/components/GallerySlider2'
 import { DEMO_STAY_LISTINGS } from '@/data/listings'
 import { StayDataType } from '@/data/types'
 import StartRating from '@/components/StartRating'
@@ -43,6 +43,7 @@ const StayCard2: FC<StayCard2Props> = ({
 		reviewCount,
 		id,
 		properties,
+		coverPhoto
 	} = data
 
 	const [isTodayWeekend, setIsTodayWeekend] = useState(false)
@@ -71,6 +72,7 @@ const StayCard2: FC<StayCard2Props> = ({
 				<GallerySlider2
 					uniqueID={`StayCard2_${id}`}
 					ratioClass="aspect-w-12 aspect-h-11"
+					coverPhoto={properties[0]?.cover_photos}
 					galleryImgs={properties[0]?.property_photos}
 					imageClass="rounded-lg"
 					href="/listing-stay-detail"

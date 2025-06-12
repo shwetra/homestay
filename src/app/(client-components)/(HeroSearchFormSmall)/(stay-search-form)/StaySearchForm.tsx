@@ -1,41 +1,3 @@
-// import React, { FC } from "react";
-// import LocationInput from "../LocationInput";
-// import GuestsInput from "../GuestsInput";
-// import StayDatesRangeInput from "./StayDatesRangeInput";
-// import { StaySearchFormFields } from "../../type";
-
-// export interface StaySearchFormProps {
-//   defaultFieldFocus?: StaySearchFormFields;
-// }
-
-// const StaySearchForm: FC<StaySearchFormProps> = ({ defaultFieldFocus }) => {
-//   const renderForm = () => {
-//     return (
-//       <form className="w-[85%] relative flex rounded-full border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800">
-//         <LocationInput
-//           // onInputDone={() => setDateFocused("startDate")}
-//           className="flex-[1.5]"
-//           autoFocus={defaultFieldFocus === "location"}
-//         />
-//         <div className="self-center border-r border-slate-200 dark:border-slate-700 h-8"></div>
-//         <StayDatesRangeInput className="flex-[1.2]" />
-
-//         <div className="self-center border-r border-slate-200 dark:border-slate-700 h-8"></div>
-//         <GuestsInput
-//           className="flex-1"
-//           autoFocus={defaultFieldFocus === "guests"}
-//           submitLink="/listing-stay"
-//         />
-//       </form>
-//     );
-//   };
-
-//   return renderForm();
-// };
-
-// export default StaySearchForm;
-
-
 
 import React, { FC, useState } from "react";
 import LocationInput from "../LocationInput";
@@ -44,13 +6,19 @@ import StayDatesRangeInput from "./StayDatesRangeInput";
 import { StaySearchFormFields } from "../../type";
 import ButtonSubmit from "../ButtonSubmit";
 import axios from "axios";
+import { useRouter } from "next/navigation";
+import { useSearchStore } from "@/app/store/useSearchStore";
 
 export interface StaySearchFormProps {
   defaultFieldFocus?: StaySearchFormFields;
 }
 
 const StaySearchForm: FC<StaySearchFormProps> = ({ defaultFieldFocus }) => {
+  const { setResults } = useSearchStore();
+  const router =useRouter()
+  
   const [location, setLocation] = useState<string>("");
+  const [locationSlug, setLocationSlug] = useState<string>("");
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
    const [featuredPlaces, setFeaturedPlaces] = useState([])
@@ -85,17 +53,22 @@ const StaySearchForm: FC<StaySearchFormProps> = ({ defaultFieldFocus }) => {
     console.log("Search Form Data:", formData);
   
     try {
-      const res = await axios.post(
-        "https://homestay.kliffhost.in/api/homesearch",
-        formData,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            "x-api-key": process.env.NEXT_PUBLIC_X_API_KEY,
-          },
-        }
+      const res = await axios.get(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/homeresult?search=${locationSlug}`,
+       { headers : {"x-api-key": process.env.NEXT_PUBLIC_X_API_KEY}}
+        // formData,
+        // {
+        //   headers: {
+        //     "Content-Type": "application/json",
+        //     "x-api-key": process.env.NEXT_PUBLIC_X_API_KEY,
+        //   },
+        // }
       );
-      setFeaturedPlaces(res.data.data)
+    
+    setResults(res.data.data);
+    // router.push(`/listing-stay/search/${formData.location}`); 
+   // router.push(`/property/${locationSlug}`);
+    router.push(`/listing-stay/search/${locationSlug}`); 
     } catch (error) {
       console.error("API Error:", error);
     }
@@ -112,6 +85,7 @@ const StaySearchForm: FC<StaySearchFormProps> = ({ defaultFieldFocus }) => {
         autoFocus={defaultFieldFocus === "location"}
         value={location}
         onChange={setLocation}
+        onInputDone={setLocationSlug}
       />
 
       <div className="self-center border-r border-slate-200 dark:border-slate-700 h-8"></div>
@@ -141,6 +115,5 @@ const StaySearchForm: FC<StaySearchFormProps> = ({ defaultFieldFocus }) => {
 };
 
 export default StaySearchForm;
-
 
 

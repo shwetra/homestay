@@ -116,7 +116,7 @@ const CustomNavbar = ({ data }: { data: MenuItem[] }) => {
                       <div key={subItem.id} className="relative group/sub">
                         <a
                           href={
-                            subItem.subsubmenus?.length > 0 ? 'javascript:void(0)' : buildPath(subItem, item.name)
+                            subItem.subsubmenus?.length > 0 ? 'javascript:void(0)' : buildPath(subItem, item.url)
                           }
                           className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-white dark:hover:bg-gray-800"
                         >
@@ -134,7 +134,7 @@ const CustomNavbar = ({ data }: { data: MenuItem[] }) => {
                               <a
                                 key={subSubItem.id}
                                 // href={`/${subSubItem.url}`}
-                                href={buildPath(subSubItem, item.name)}
+                                href={buildPath(subSubItem, item.url)}
                                 className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-white dark:hover:bg-gray-800"
                               >
                                 {subSubItem.name}

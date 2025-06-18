@@ -22,6 +22,7 @@ interface ModalReserveMobileProps {
   roomPrice?: any,
   totalPrice?: any,
   result?: any,
+  
 }
 
 const ModalReserveMobile: FC<ModalReserveMobileProps> = ({

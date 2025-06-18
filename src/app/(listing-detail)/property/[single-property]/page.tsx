@@ -297,41 +297,56 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ }) => {
 	// 		setGuestLimitExceed(true)
 	// 	}
 	// 	else {
+	// 		setSelectGuestWarning(false)
+	// 		setSelectRoomFirstWarning(false)
+	// 		setGuestLimitExceed(false)
 	// 		openModal()
 	// 	}
 	// }
 
-	const handleErrorMessageDisplay = (openModal: any) => {
-	const totalGuests = guestAdultsInputValue + guestChildrenInputValue + extraGuest;
-	const maxGuests = numberOfRoomSelected * listingDetail?.rooms?.[0]?.accommodates;
-    	// console.log("Accommodates",listingDetail?.rooms?.[0]?.accommodates)
-	console.log('numberOfRoomSelected Page', numberOfRoomSelected)
-	if (numberOfRoomSelected == 0) {
-		setSelectRoomFirstWarning(true);
-		setSelectGuestWarning(false);
-		setGuestLimitExceed(false);
-	} else if (guestAdultsInputValue == 0) {
-		setSelectGuestWarning(true);
-		setSelectRoomFirstWarning(false);
-		setGuestLimitExceed(false);
-	} else if (totalGuests > maxGuests) {
-		setSelectGuestWarning(false);
-		setSelectRoomFirstWarning(false);
-		setGuestLimitExceed(true);
-	} else {
-		setSelectGuestWarning(false);
-		setSelectRoomFirstWarning(false);
-		setGuestLimitExceed(false);
-		openModal(); //
-	}
+const handleErrorMessageDisplay = (openModal: any) => {
+  const totalGuests = guestAdultsInputValue + guestChildrenInputValue + extraGuest;
+
+  const selectedRooms = currentActiveRoom?.rooms || [];
+  const numberOfRoomSelected = selectedRooms.reduce((acc: number, room: any) => acc + room.count, 0);
+
+  const totalAccommodates = selectedRooms.reduce(
+    (acc: number, room: any) => acc + (room.accommodates * room.count),
+    0
+  );
+
+  console.log("Room count:", numberOfRoomSelected);
+  console.log("Accommodates:", totalAccommodates);
+  console.log("Guest Total:", totalGuests);
+
+  if (numberOfRoomSelected === 0 || selectedRooms.length === 0) {
+    setSelectRoomFirstWarning?.(true);
+    setSelectGuestWarning?.(false);
+    setGuestLimitExceed?.(false);
+  } else if (totalGuests === 0) {
+    setSelectRoomFirstWarning?.(false);
+    setSelectGuestWarning?.(true);
+    setGuestLimitExceed?.(false);
+  } else if (totalGuests > totalAccommodates) {
+    setSelectRoomFirstWarning?.(false);
+    setSelectGuestWarning?.(false);
+    setGuestLimitExceed?.(true);
+  } else {
+    setSelectRoomFirstWarning?.(false);
+    setSelectGuestWarning?.(false);
+    setGuestLimitExceed?.(false);
+    openModal();
+  }
 };
 
 
-	// useEffect(() => {
-	// 	if (guestAdultsInputValue + guestChildrenInputValue - extraGuest > numberOfRoomSelected) {
-	// 		handleErrorMessageDisplay(() => { })
-	// 	}
-	// }, [guestAdultsInputValue, guestChildrenInputValue])
+
+
+	useEffect(() => {
+		if (guestAdultsInputValue + guestChildrenInputValue - extraGuest > numberOfRoomSelected) {
+			handleErrorMessageDisplay(() => { })
+		}
+	}, [guestAdultsInputValue, guestChildrenInputValue])
 
 
 	const renderSection1 = ({ result }: any) => {
@@ -1083,7 +1098,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ }) => {
 							
 						<div className="flex justify-between text-neutral-600 dark:text-neutral-300">
 							<span>Convenience Fee ({convenienceFee}%)</span>
-							<span>₹ {((convenienceFee / 100) * surgedPrice)}</span>
+							<span>₹ {((convenienceFee / 100) * surgedPrice).toFixed(0)}</span>
 						</div>
 						<div className="flex justify-between text-neutral-600 dark:text-neutral-300">
 							<span>GST ({gst}%)</span>
@@ -1154,6 +1169,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ }) => {
 					roomPrice={roomPrice}
 					totalPrice={totalPrice}
 					result={result}
+					
 				/>
 			</div>
 		)
@@ -1332,12 +1348,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ }) => {
 																</svg>
 																<p>x 1</p>
 															</div>
-
-
-
-
-
-														</div>
+															</div>
 													</div>
 													<div className="flex items-start flex-col">
 														<p className="text-base font-semibold">
@@ -1347,10 +1358,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ }) => {
 
 
 														<form>
-
-
-
-															<select
+															{/* <select
 																id="rooms"
 																className="bg-gray-50 w-full min-w-[9rem] my-2 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-[#111827] dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
 															onChange={(e) => {
@@ -1413,6 +1421,63 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ }) => {
 																		</option>
 																	);
 																})}
+															</select> */}
+															<select
+															id="rooms"
+															className="bg-gray-50 w-full min-w-[9rem] my-2 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-[#111827] dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+															onChange={(e) => {
+																const selectedValue = parseInt(e.target.value);
+																const roomKey = item?.space_type;
+
+																let updatedRooms = [...selectedRooms].filter(r => r.space_type !== roomKey);
+
+																if (selectedValue > 0) {
+																const newRoom = {
+																	type: item?.room_type,
+																	count: selectedValue,
+																	accommodates: item?.accommodates,
+																	guest_fee: item?.guest_fee,
+																	room_price: item?.room_price,
+																	room_id: item?.id,
+																	space_type: item?.space_type
+																};
+																updatedRooms.push(newRoom);
+																}
+
+																setSelectedRooms(updatedRooms);
+
+																const total = updatedRooms.reduce((acc, room) => acc + room.room_price * room.count, 0);
+																setRoomPrice(total);
+
+																localStorage.setItem("selectedRooms", JSON.stringify(updatedRooms));
+
+																let updatedGuestFee = 0;
+																if (total === 1) {
+																const singleRoom = updatedRooms.find(r => r.count === 1);
+																updatedGuestFee = singleRoom?.guest_fee || 0;
+																} else if (total > 1) {
+																const guestFees = updatedRooms.flatMap(room => Array(room.count).fill(room.guest_fee));
+																updatedGuestFee = Math.min(...guestFees);
+																}
+
+																setCurrentActiveRoom((prev: any) => ({
+																...prev,
+																rooms: updatedRooms,
+																guest_fee: updatedGuestFee
+																}));
+															}}
+															>
+															<option value='0' selected={currentActiveRoom.type !== item?.room_type}>
+																Select {item?.room_type}
+															</option>
+															{[...Array(item?.total_rooms)].map((_, index) => {
+																const value = index + 1;
+																return (
+																<option key={value} value={value}>
+																	{value} {item?.room_type}
+																</option>
+																);
+															})}
 															</select>
 
 														</form>

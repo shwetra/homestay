@@ -224,25 +224,54 @@ const GuestsInput: FC<GuestsInputProps> = ({
 	// 	}
 	// }, [guestInfantsInputValue, guestAdultsInputValue, guestChildrenInputValue, numberOfRoomSelected])
 
-	useEffect(() => {
-	const totalGuests = guestAdultsInputValue + guestChildrenInputValue + extraGuest;
-	const maxGuests = numberOfRoomSelected * listingDetails?.rooms?.[0]?.accommodates;
-	console.log('numberOfRoomSelected',numberOfRoomSelected);
-	console.log('Accommodates',listingDetails?.rooms?.[0]?.accommodates);
-	if (guestAdultsInputValue > maxGuests) {
-		setGuestLimitExceed?.(true);
-	} else {
-		setGuestLimitExceed?.(false);
-	}
-}, [guestAdultsInputValue, guestChildrenInputValue, extraGuest, numberOfRoomSelected, currentActiveRoom]);
+// 	useEffect(() => {
+// 	const totalGuests = guestAdultsInputValue + guestChildrenInputValue + extraGuest;
+// 	const maxGuests =  listingDetails?.rooms?.[0]?.accommodates;
+// 	console.log('numberOfRoomSelected',numberOfRoomSelected);
+// 	console.log('Accommodates', maxGuests);
+// 	if (totalGuests > maxGuests) {
+// 		setGuestLimitExceed?.(true);
+// 	} else {
+// 		setGuestLimitExceed?.(false);
+// 	}
+// }, [guestAdultsInputValue, guestChildrenInputValue, extraGuest, numberOfRoomSelected, currentActiveRoom]);
+
+// useEffect(() => {
+//   const totalGuests = guestAdultsInputValue + guestChildrenInputValue + extraGuest;
 
 
+//   const totalAccommodates = currentActiveRoom?.rooms?.reduce(
+//     (acc: number, room: any) => acc + (room.accommodates * room.count),
+//     0
+//   ) || 0;
 
+//   if (totalGuests > totalAccommodates) {
+//     setGuestLimitExceed?.(true);
+//   } else {
+//     setGuestLimitExceed?.(false);
+//   }
+// }, [guestAdultsInputValue, guestChildrenInputValue, extraGuest, currentActiveRoom, setGuestLimitExceed]);
+
+
+useEffect(() => {
+  const totalGuests = guestAdultsInputValue + guestChildrenInputValue + extraGuest;
+  const totalAccommodates = currentActiveRoom?.rooms?.reduce(
+    (acc: number, room: any) => acc + (room.accommodates * room.count),
+    0
+  ) || 0;
+console.log(currentActiveRoom?.rooms?.[0]?.accommodates, 'Guest Page totalAccommodates')
+
+  if (totalGuests > totalAccommodates) {
+    setGuestLimitExceed?.(true);
+  } else {
+    setGuestLimitExceed?.(false);
+  }
+}, [guestAdultsInputValue, guestChildrenInputValue, extraGuest, currentActiveRoom]);
 	useEffect(() => {
 		if (!guestAdultsInputValue || guestAdultsInputValue === 0) {
 			setGuestAdultsInputValue?.(1)
 		}
-	}, [])
+	}, [guestAdultsInputValue, setGuestAdultsInputValue])
 
 	return (
 		<Popover className={`relative flex ${className}`}>

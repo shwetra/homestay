@@ -5,6 +5,19 @@
 html{
     scroll-behavior: smooth;
 }
+.mr-t-5{margin-top:5px!important;}
+.gm-control-active {
+  display: none !important;
+}
+.react-datepicker__day_span{    height: 36px!important;
+    width: 36px!important;}
+.react-datepicker__day-names{margin-top:0.10rem !important;}
+.react-datepicker__month{margin-top:0.08rem !important;}
+.cstm-btn-padding button{padding:2px;}
+.mt-3 {
+    margin-top: 0.60rem!important;
+}
+.cstm-padding{padding:0.70rem!important}
 .customListedStyle ul{list-style:disc; margin-left:16px;}
 .customListedStyle ol{margin-left:16px; list-style:decimal; }
 .testimonial-swiper .swiper-pagination{

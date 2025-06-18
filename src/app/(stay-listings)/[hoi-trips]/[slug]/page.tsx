@@ -212,7 +212,7 @@ const HoiTripsDetails = () => {
 	const renderSection1 = ({ result }: any) => {
 		
 		return (
-			<div className="listingSection__wrap !space-y-6">
+			<div className="listingSection__wrap cstm-padding !space-y-3">
 			
 
 				
@@ -221,7 +221,7 @@ const HoiTripsDetails = () => {
 				</h2>
 
 			
-				<div className="flex items-center space-x-4">
+				<div className="flex items-center space-x-4 ">
 					<div className="flex items-start">
 						<MapPinIcon className="h-5 w-5" />
 						
@@ -273,15 +273,15 @@ const HoiTripsDetails = () => {
 	}
     const renderSection2 = ({ description }: any) => {
             return (
-                <div className="listingSection__wrap">
+                <div className="listingSection__wrap cstm-padding">
                     <h2 className="text-2xl font-semibold">Stay information</h2>
                     {/* <div className="w-14 border-b border-neutral-200 dark:border-neutral-700"></div> */}
-                    <div className="text-neutral-600 dark:text-neutral-300">
+                    <div className="text-neutral-600 dark:text-neutral-300 mt-3">
                         <span>
                             {description?.description ? parse(description?.description) : ''}
                         </span>
                     </div>
-                    <div className="text-neutral-600 dark:text-neutral-300">
+                    <div className="text-neutral-600 dark:text-neutral-300 mt-3">
                         <span>
                             {description?.content ? parse(description?.content) : ''}
                         </span>
@@ -291,24 +291,24 @@ const HoiTripsDetails = () => {
      }   
       const includesExcludes = ({ includeExclude }: any) => {
             return (
-                <div className="listingSection__wrap">
+                <div className="listingSection__wrap cstm-padding">
                     
                     {/* <div className="w-14 border-b border-neutral-200 dark:border-neutral-700"></div> */}
-                    <div className="text-neutral-600 dark:text-neutral-300">
+                    <div className="text-neutral-600 dark:text-neutral-300 mt-3">
                         <span className ="customListedStyle">
                             {includeExclude?.includes ? parse(includeExclude?.includes) : ''}
                         </span>
                     </div>
                       
                     {/* <div className="w-14 border-b border-neutral-200 dark:border-neutral-700"></div> */}
-                    <div className="text-neutral-600 dark:text-neutral-300">
+                    <div className="text-neutral-600 dark:text-neutral-300 mt-3">
                         <span className ="customListedStyle">
                             {includeExclude?.excludes ? parse(includeExclude?.excludes) : ''}
                         </span>
                     </div>
-                      <h3 className="text-2xl font-semibold">General Rules</h3>
+                     
                     {/* <div className="w-14 border-b border-neutral-200 dark:border-neutral-700"></div> */}
-                    <div className="text-neutral-600 dark:text-neutral-300">
+                    <div className="text-neutral-600 dark:text-neutral-300 mt-3">
                         <span className ="customListedStyle">
                             {includeExclude?.generalrules ? parse(includeExclude?.generalrules) : ''}
                         </span>
@@ -319,13 +319,13 @@ const HoiTripsDetails = () => {
      
         const renderSection6 = () => {
 		return (
-			<div className="listingSection__wrap">
+			<div className="listingSection__wrap cstm-padding">
 				{/* HEADING */}
 				<h2 className="text-2xl font-semibold">Reviews (23 reviews)</h2>
-				<div className="w-14 border-b border-neutral-200 dark:border-neutral-700"></div>
+			
 
 				{/* Content */}
-				<div className="space-y-5">
+				<div className="space-y-2 mt-3">
 					<FiveStartIconForRate iconClass="w-6 h-6" className="space-x-0.5" />
 					<div className="relative">
 						<Input
@@ -344,7 +344,7 @@ const HoiTripsDetails = () => {
 				</div>
 
 				{/* comment */}
-				<div className="divide-y divide-neutral-100 dark:divide-neutral-800">
+				<div className="divide-y divide-neutral-100 dark:divide-neutral-800 mt-3">
 					<CommentListing className="py-8" />
 					<CommentListing className="py-8" />
 					<CommentListing className="py-8" />
@@ -359,7 +359,7 @@ const HoiTripsDetails = () => {
   const sideBar = ({sideBarHoiTrips} : any) =>{
       return(
           <>
-            <div className="listingSectionSidebar__wrap shadow-xl mt-[6rem] sm:mt-0">
+            <div className="listingSectionSidebar__wrap shadow-xl mt-[6rem] sm:mt-0 cstm-padding">
                     {/* PRICE */}
                   <div className="flex justify-between">
 					          <span className="text-xl font-semibold">
@@ -487,7 +487,7 @@ const HoiTripsDetails = () => {
                                   Message (optional)
                                 </label>
                               </div>
-                             <div className="mt-10 flex justify-center">
+                             <div className="mt-3 flex justify-center">
                                 <ButtonPrimary type="submit">Confirm Booking</ButtonPrimary>
                                
                                   {/* <ToastAlert

@@ -6,7 +6,7 @@ import Heading1 from "@/shared/Heading1";
 import { useImages } from "@/app/contextApi/ImageContext";
 import HoiTripsCard from "@/components/HoiTripsCard";
 import { useParams } from "next/navigation";
-import Link from "next/link";
+
 interface HoitripPhoto {
   id: number;
   photo: string;
@@ -62,9 +62,11 @@ const HoiTrips = () => {
         <div className="grid grid-cols-1 gap-6 md:gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {allProperties.map((trip: Hoitrip, index: number) => (
             <>
-            <Link href={`/hoitrips/${trip.slug}`}>
+            
             <HoiTripsCard
               key={index}
+              id={trip.id}
+              slug={trip.slug}
               title={trip.title}
               location={`${trip.city || "Unknown"}, ${trip.state || "Unknown"}`}
               price={trip.price}
@@ -72,7 +74,7 @@ const HoiTrips = () => {
               reviews={0}
               images={trip.hoitripphoto?.map(photo => photo.photo) || []}
             />
-            </Link>
+            
             </>
           ))}
         </div>

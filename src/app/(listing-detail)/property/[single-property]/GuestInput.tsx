@@ -184,6 +184,7 @@ export interface GuestsInputProps {
 	setGuestInfantsInputValue?: (val: number) => void;
 	setExtraGuest?: (val: number) => void;
 	currentActiveRoom?: any;
+	listingDetails?: any,
 	guestLimitExceed?: boolean;
 	setGuestLimitExceed?: (val: boolean) => void;
 	numberOfRoomSelected?: number;
@@ -196,6 +197,7 @@ const GuestsInput: FC<GuestsInputProps> = ({
 	guestChildrenInputValue = 0,
 	guestInfantsInputValue = 0,
 	extraGuest = 0,
+	listingDetails,
 	setGuestAdultsInputValue,
 	setGuestChildrenInputValue,
 	setGuestInfantsInputValue,
@@ -214,13 +216,27 @@ const GuestsInput: FC<GuestsInputProps> = ({
 
 	const totalGuests = guestChildrenInputValue + guestAdultsInputValue  + (extraGuest || 0)
 
+	// useEffect(() => {
+	// 	if ((guestChildrenInputValue + guestAdultsInputValue + extraGuest) > (numberOfRoomSelected * currentActiveRoom?.accommodates)) {
+	// 		setGuestLimitExceed?.(true)
+	// 	} else {
+	// 		setGuestLimitExceed?.(false)
+	// 	}
+	// }, [guestInfantsInputValue, guestAdultsInputValue, guestChildrenInputValue, numberOfRoomSelected])
+
 	useEffect(() => {
-		if ((guestChildrenInputValue + guestAdultsInputValue + extraGuest) > (numberOfRoomSelected * currentActiveRoom?.accommodates)) {
-			setGuestLimitExceed?.(true)
-		} else {
-			setGuestLimitExceed?.(false)
-		}
-	}, [guestInfantsInputValue, guestAdultsInputValue, guestChildrenInputValue, numberOfRoomSelected])
+	const totalGuests = guestAdultsInputValue + guestChildrenInputValue + extraGuest;
+	const maxGuests = numberOfRoomSelected * listingDetails?.rooms?.[0]?.accommodates;
+	console.log('numberOfRoomSelected',numberOfRoomSelected);
+	console.log('Accommodates',listingDetails?.rooms?.[0]?.accommodates);
+	if (guestAdultsInputValue > maxGuests) {
+		setGuestLimitExceed?.(true);
+	} else {
+		setGuestLimitExceed?.(false);
+	}
+}, [guestAdultsInputValue, guestChildrenInputValue, extraGuest, numberOfRoomSelected, currentActiveRoom]);
+
+
 
 	useEffect(() => {
 		if (!guestAdultsInputValue || guestAdultsInputValue === 0) {
@@ -239,7 +255,7 @@ const GuestsInput: FC<GuestsInputProps> = ({
 							</div>
 							<div className="flex-grow">
 								<span className="block font-semibold xl:text-lg">{totalGuests || ''} Guests</span>
-								<span className="mt-1 block text-sm font-light leading-none text-neutral-400">
+								<span className="mt-1 mb-2 block text-sm font-light leading-none text-neutral-400">
 									{totalGuests ? 'Guests' : 'Add guests'}
 								</span>
 							</div>

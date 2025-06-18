@@ -1,32 +1,34 @@
 import React from "react";
 import GallerySlider4 from '@/components/GallerySlider4'
-import { StarIcon } from '@heroicons/react/24/solid'
 import StartRating from '@/components/StartRating'
 import BtnLikeIcon from '@/components/BtnLikeIcon'
 import Link from "next/link";
+
 interface HomestayCardProps {
   size?: 'default' | 'small',
   title: string;
   location: string;
-  bedrooms: number;
-  beds: number;
+  // bedrooms: number;
+  // beds: number;
   price: number;
   rating: number;
   reviews: number;
   images: string[];
   id: string | number;
+  slug:string;
 }
 const HomestayCard: React.FC<HomestayCardProps> = ({
   size = 'default',
   title,
   location,
-  bedrooms,
-  beds,
+  // bedrooms,
+  // beds,
   price,
   rating,
   reviews,
   images,
   id,
+  slug,
   }) => {
   const settings = {
     dots: true,
@@ -47,17 +49,17 @@ const HomestayCard: React.FC<HomestayCardProps> = ({
         ratioClass="aspect-w-12 aspect-h-8"
         galleryImgs={images}
         imageClass="rounded-lg"
-        // href="/listing-stay-detail"
+        href={`/property/${slug}`}
     />
         <BtnLikeIcon  className="absolute right-3 top-3 z-[1]" />
       </div>
-      
+      <Link href={`/property/${slug}`}>
       <div className="p-4">
-       {bedrooms && beds && (
+       {/* {bedrooms && beds && (
         <span className="text-sm text-neutral-500 dark:text-neutral-400">
             {bedrooms} bedroom · {beds} bed
         </span>
-        )}
+        )} */}
         
         <div className="flex items-center space-x-2">
 						
@@ -112,7 +114,7 @@ const HomestayCard: React.FC<HomestayCardProps> = ({
 					
 				</div>
       </div>
-      
+      </Link>
     </div>
    </>
   );

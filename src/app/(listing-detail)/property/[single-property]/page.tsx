@@ -63,7 +63,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ }) => {
 	const [activeModal, setActiveModal] = useState<number | null>(null);
 	const [categorizedRooms, setCategorizeRooms] = useState<any>([])
 	const [roomPrice, setRoomPrice] = useState<number>(0)
-	const [selectedRooms, setSelectedRooms] = useState<any>({});
+	const [selectedRooms, setSelectedRooms] = useState<any[]>([]);
 	const [propertyDates, setPropertyDates] = useState<any>([]);
 	const [currentActiveRoom, setCurrentActiveRoom] = useState<any>({
 		type: '',
@@ -77,7 +77,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ }) => {
 	const [gst, setGst] = useState<any>()
 	const [workationDiscount, setWorkationDiscount] = useState<any>(0)
 	const [guestAdultsInputValue, setGuestAdultsInputValue] = useState(0)
-	const [guestChildrenInputValue, setGuestChildrenInputValue] = useState(0)
+	const [guestChildrenInputValue, setGuestChildrenInputValue] = useState<number>(0);
 	const [guestInfantsInputValue, setGuestInfantsInputValue] = useState(0)
 	const [extraGuest, setExtraGuest] = useState<any>(0)
 	const [guestLimitExceed, setGuestLimitExceed] = useState<boolean>(false)
@@ -85,17 +85,18 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ }) => {
 	const [selectRoomFirstWarning, setSelectRoomFirstWarning] = useState<any>(false)
 	const [numberOfRoomSelected, setNumberOfRoomSelected] = useState<any>(0)
 	const [totalPrice, setTotalPrice] = useState<number>(0);
-
-
-
-
-
-	const getRoomPrice = (currentActiveRoom: any) => {
+    const getRoomPrice = (currentActiveRoom: any) => {
 		const price = listingDetail?.rooms?.find((room: any) => room?.room_type?.name.toLowerCase() === currentActiveRoom?.toLowerCase())?.room_price
 		return price;
 	}
 
-	const currentroomPrice = getRoomPrice(currentActiveRoom?.type || 'Classic')
+	// const currentroomPrice = getRoomPrice(currentActiveRoom?.type || 'Classic')
+  const currentroomPrice =
+  selectedRooms.length === 1
+    ? selectedRooms[0].room_price
+    : selectedRooms.length > 1
+      ? Math.min(...selectedRooms.map(r => r.room_price))
+      : getRoomPrice(currentActiveRoom?.type || 'Classic');
 
 	// calender variables 
 	const [startDate, setStartDate] = useState<any>(
@@ -159,8 +160,8 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ }) => {
 
 	const calculateTotalFee = () => {
 		// const price = listingDetail?.result?.property_price?.price ?? 0;
-		const guestFee = listingDetail?.result?.property_price?.guest_fee ?? 0;
-		const securityFee = listingDetail?.result?.property_price?.security_fee ?? 0;
+		const guestFee = listingDetail?.rooms?.[0]?.room_pricing?.[0]?.guest_fee ?? 0;
+		const securityFee = listingDetail?.rooms?.[0]?.room_pricing?.security_fee ?? 0;
 		// const cleaningFee = listingDetail?.result?.property_price?.cleaning_fee ?? 0;
 		const totalDays = daysToStay;
 
@@ -279,38 +280,64 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ }) => {
 	}
 
 
-	const handleErrorMessageDisplay = (openModal: any) => {
-		if (numberOfRoomSelected == 0) {
-			setSelectRoomFirstWarning(true)
-			setSelectGuestWarning(false)
-			setGuestLimitExceed(false)
-		}
-		else if (guestAdultsInputValue == 0) {
-			setSelectGuestWarning(true)
-			setSelectRoomFirstWarning(false)
-			setGuestLimitExceed(false)
-		}
-		else if ((guestAdultsInputValue + guestChildrenInputValue - extraGuest) > numberOfRoomSelected) {
-			setSelectGuestWarning(false)
-			setSelectRoomFirstWarning(false)
-			setGuestLimitExceed(true)
-		}
-		else {
-			openModal()
-		}
-	}
+	// const handleErrorMessageDisplay = (openModal: any) => {
+	// 	if (numberOfRoomSelected == 0) {
+	// 		setSelectRoomFirstWarning(true)
+	// 		setSelectGuestWarning(false)
+	// 		setGuestLimitExceed(false)
+	// 	}
+	// 	else if (guestAdultsInputValue == 0) {
+	// 		setSelectGuestWarning(true)
+	// 		setSelectRoomFirstWarning(false)
+	// 		setGuestLimitExceed(false)
+	// 	}
+	// 	else if ((guestAdultsInputValue + guestChildrenInputValue - extraGuest) > numberOfRoomSelected) {
+	// 		setSelectGuestWarning(false)
+	// 		setSelectRoomFirstWarning(false)
+	// 		setGuestLimitExceed(true)
+	// 	}
+	// 	else {
+	// 		openModal()
+	// 	}
+	// }
 
-	useEffect(() => {
-		if (guestAdultsInputValue + guestChildrenInputValue - extraGuest > numberOfRoomSelected) {
-			handleErrorMessageDisplay(() => { })
-		}
-	}, [guestAdultsInputValue, guestChildrenInputValue])
+	const handleErrorMessageDisplay = (openModal: any) => {
+	const totalGuests = guestAdultsInputValue + guestChildrenInputValue + extraGuest;
+	const maxGuests = numberOfRoomSelected * listingDetail?.rooms?.[0]?.accommodates;
+    	// console.log("Accommodates",listingDetail?.rooms?.[0]?.accommodates)
+	console.log('numberOfRoomSelected Page', numberOfRoomSelected)
+	if (numberOfRoomSelected == 0) {
+		setSelectRoomFirstWarning(true);
+		setSelectGuestWarning(false);
+		setGuestLimitExceed(false);
+	} else if (guestAdultsInputValue == 0) {
+		setSelectGuestWarning(true);
+		setSelectRoomFirstWarning(false);
+		setGuestLimitExceed(false);
+	} else if (totalGuests > maxGuests) {
+		setSelectGuestWarning(false);
+		setSelectRoomFirstWarning(false);
+		setGuestLimitExceed(true);
+	} else {
+		setSelectGuestWarning(false);
+		setSelectRoomFirstWarning(false);
+		setGuestLimitExceed(false);
+		openModal(); //
+	}
+};
+
+
+	// useEffect(() => {
+	// 	if (guestAdultsInputValue + guestChildrenInputValue - extraGuest > numberOfRoomSelected) {
+	// 		handleErrorMessageDisplay(() => { })
+	// 	}
+	// }, [guestAdultsInputValue, guestChildrenInputValue])
 
 
 	const renderSection1 = ({ result }: any) => {
 		// console.log(result,"rddgg")
 		return (
-			<div className="listingSection__wrap !space-y-6">
+			<div className="listingSection__wrap cstm-padding !space-y-3">
 				{/* 1 */}
 				{/* <div className="flex items-center justify-between">
 					<Badge name="Wooden house" />
@@ -328,7 +355,8 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ }) => {
 						<MapPinIcon className="h-5 w-5" />
 						{/* <span className="ml-1">  {result?.property_address?.address_line_1}</span> */}
 						<span className="ml-1">
-  					{result?.property_address?.address_line_1?.split(',').slice(1).join(',').trim()}
+  					{/* {result?.property_address?.address_line_1?.split(',').slice(1).join(',').trim()} */}
+					{result?.property_address?.display_address !== null ? result?.property_address?.display_address : result?.property_address?.address_line_1?.split(',').slice(1).join(',').trim()}
 				</span>
 
 					</div>
@@ -502,10 +530,10 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ }) => {
 
 	const renderSection2 = ({ description }: any) => {
 		return (
-			<div className="listingSection__wrap">
+			<div className="listingSection__wrap cstm-padding">
 				<h2 className="text-2xl font-semibold">Stay information</h2>
 				{/* <div className="w-14 border-b border-neutral-200 dark:border-neutral-700"></div> */}
-				<div className="text-neutral-600 dark:text-neutral-300">
+				<div className="text-neutral-600 dark:text-neutral-300 mt-3">
 					<span>
 						{description?.summary ? parse(description?.summary) : ''}
 					</span>
@@ -519,7 +547,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ }) => {
 
 		return (
 			<>
-			<div className="listingSection__wrap">
+			<div className="listingSection__wrap cstm-padding">
 				<div>
 					<h2 className="text-2xl font-semibold">Facilities </h2>
 					<span className="mt-2 block text-neutral-500 dark:text-neutral-400">
@@ -527,7 +555,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ }) => {
 					</span>
 				</div>
 				{/* 6 */}
-				<div className="flex gap-5 flex-wrap">
+				<div className="flex gap-5 flex-wrap mt-3">
 					{amenities?.Facilities?.filter((_: any, i: any) => i < 12).map((item: any) => (
 						<div key={item.id} className="flex items-center space-x-3">
 							{/* <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
@@ -540,18 +568,18 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ }) => {
 				</div>
 
 				{/* ----- */}
-				<div className="w-14 border-b border-neutral-200"></div>
-				<div>
-					<ButtonSecondary onClick={openModalAmenities}>
+				{/* <div className="w-14 border-b border-neutral-200"></div> */}
+				{/* <div> */}
+					{/* <ButtonSecondary onClick={openModalAmenities}> */}
 						{/* <ButtonSecondary onClick={() => { 
 						openModalAmenities();
 						renderModalAmenities(listingDetail?.amenities); 
 					}}> */}
-						View more amenities
-					</ButtonSecondary>
-				</div>
-				{renderModalAmenities()}
-				{amenities?.Inclusive.length > 0 && (
+						{/* View more amenities
+					</ButtonSecondary> */}
+				{/* </div> */}
+				{/* {renderModalAmenities()} */}
+				{/* {amenities?.Inclusive.length > 0 && (
 					<>
 						<h2 className="text-2xl font-semibold">Inclusive</h2>
 						<div className="flex gap-5 flex-wrap">
@@ -563,8 +591,8 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ }) => {
 						))}
 						</div>
 					</>
-					)}
-					{amenities?.Exclusive.length > 0 && (
+					)} */}
+					{/* {amenities?.Exclusive.length > 0 && (
 						<>
 				<h2 className="text-2xl font-semibold">Exclusive </h2>
 				<div className="flex gap-5 flex-wrap">
@@ -577,7 +605,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ }) => {
 					))}
 				</div>
 				</>
-					)}
+					)} */}
 			</div>
 			
 			
@@ -634,7 +662,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ }) => {
 
 	const renderSafetyAmenities = ({ amenities }: any) => {
 		return (
-			<div className="listingSection__wrap">
+			<div className="listingSection__wrap cstm-padding">
 				<div>
 					<h2 className="text-2xl font-semibold">Safety Amentites </h2>
 					<span className="mt-2 block text-neutral-500 dark:text-neutral-400">
@@ -642,7 +670,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ }) => {
 					</span>
 				</div>
 				{/* 6 */}
-				<div className="flex gap-5 flex-wrap">
+				<div className="flex gap-5 flex-wrap mt-3">
 					{amenities?.SafetyAmenities?.map((item: any) => (
 						<div key={item.id} className="flex items-center space-x-3">
 							<strong className='text-[1.5rem] text-gray-500'>&bull;</strong>
@@ -656,7 +684,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ }) => {
 	const renderInclusive = ({ allNewAmenities }: any) => {
 		console.log("inclusive =", allNewAmenities )
 		return (
-			<div className="listingSection__wrap">
+			<div className="listingSection__wrap cstm-padding">
 				<div>
 					<h2 className="text-2xl font-semibold">Inclusive</h2>
 				
@@ -677,7 +705,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ }) => {
 
 	const renderSection4 = () => {
 		return (
-			<div className="listingSection__wrap">
+			<div className="listingSection__wrap cstm-padding">
 				{/* HEADING */}
 				<div>
 					<h2 className="text-2xl font-semibold">Room Rates </h2>
@@ -721,13 +749,13 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ }) => {
 
 	const renderSection5 = ({ result }: any) => {
 		return (
-			<div className="listingSection__wrap">
+			<div className="listingSection__wrap cstm-padding">
 				{/* HEADING */}
 				<h2 className="text-2xl font-semibold">Host Information</h2>
-				<div className="w-14 border-b border-neutral-200 dark:border-neutral-700"></div>
+				<div className="w-14 border-b border-neutral-200 dark:border-neutral-700 mt-3"></div>
 
 				{/* host */}
-				<div className="flex items-center space-x-4">
+				<div className="flex items-center space-x-4 mt-3">
 					<Avatar
 						hasChecked
 						hasCheckedClass="w-4 h-4 -top-0.5 right-0.5"
@@ -767,13 +795,13 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ }) => {
 
 	const renderSection6 = () => {
 		return (
-			<div className="listingSection__wrap">
+			<div className="listingSection__wrap cstm-padding">
 				{/* HEADING */}
 				<h2 className="text-2xl font-semibold">Reviews (23 reviews)</h2>
-				<div className="w-14 border-b border-neutral-200 dark:border-neutral-700"></div>
+				<div className="w-14 border-b border-neutral-200 dark:border-neutral-700 mt-3"></div>
 
 				{/* Content */}
-				<div className="space-y-5">
+				<div className="space-y-3 mt-3">
 					<FiveStartIconForRate iconClass="w-6 h-6" className="space-x-0.5" />
 					<div className="relative">
 						<Input
@@ -807,20 +835,20 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ }) => {
 
 	const renderSection7 = ({ result }: any) => {
 		return (
-			<div className="listingSection__wrap">
+			<div className="listingSection__wrap cstm-padding">
 				{/* HEADING */}
 				<div>
 					<h2 className="text-2xl font-semibold">How to reach</h2>
-					<div className="text-neutral-600 dark:text-neutral-300">
-						<span className="mt-5 block text-neutral-500 dark:text-neutral-400">
+					<div className="text-neutral-600 dark:text-neutral-300 mt-3">
+						<span className="mt-5 block text-neutral-500 dark:text-neutral-400 mt-3">
 							{description?.place_is_great_for ? parse(description?.place_is_great_for) : ''}
 						</span>
 					</div>
 				</div>
-				<div className="w-14 border-b border-neutral-200 dark:border-neutral-700" />
+				
 
 				{/* MAP */}
-				<div className="aspect-h-5 aspect-w-5 z-0 rounded-xl ring-1 ring-black/10 sm:aspect-h-3">
+				<div className="aspect-h-5 aspect-w-5 z-0 rounded-xl ring-1 ring-black/10 sm:aspect-h-3 mt-3">
 					<div className="z-0 overflow-hidden rounded-xl">
 						{/* <iframe
 							width="100%"
@@ -840,7 +868,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ }) => {
 
 	const renderSection8 = () => {
 		return (
-			<div className="listingSection__wrap">
+			<div className="listingSection__wrap cstm-padding">
 				{/* HEADING */}
 				<h2 className="text-2xl font-semibold">Things to know</h2>
 				<div className="w-14 border-b border-neutral-200 dark:border-neutral-700" />
@@ -855,11 +883,11 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ }) => {
 
 	const renderSection9 = () => {
 		return (
-			<div className="listingSection__wrap">
+			<div className="listingSection__wrap cstm-padding">
 				<h2 className="text-2xl font-semibold">Child Policy</h2>
 
 				{/* CONTENT */}
-				<div>
+				<div className={'mt-3'}>
 					{/* {description?.about_place ? parse(description?.about_place) : ''} */}
 
 					Up to 6 years: Complimentary (no extra bed) <br/>
@@ -872,11 +900,11 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ }) => {
 
 	const renderSection10 = () => {
 		return (
-			<div className="listingSection__wrap">
+			<div className="listingSection__wrap cstm-padding">
 				<h2 className="text-2xl font-semibold">Foods</h2>
 
 				{/* CONTENT */}
-				<div>
+				<div className='mt-3'>
 					<span className="block text-neutral-600 dark:text-neutral-300">
 						{description?.guest_can_access ? parse(description?.guest_can_access) : ''}
 					</span>
@@ -887,12 +915,12 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ }) => {
 
 	const renderSection11 = ({ description }: any) => {
 		return (
-			<div className="listingSection__wrap">
+			<div className="listingSection__wrap cstm-padding">
 				<div>
 					<h2 className="text-2xl font-semibold">Activities  </h2>
 				</div>
 				{/* 6 */}
-				<div className="flex gap-5 flex-wrap">
+				<div className="flex gap-5 flex-wrap mt-3">
 					{description?.guestsactivity?.map((item: any, index: number) => (
 						<div key={index} className="flex items-center space-x-3">
 							{/* <strong className='text-[1.5rem] text-gray-500'>&bull;</strong> */}
@@ -906,14 +934,14 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ }) => {
 
 	const renderSection12 = ({ attractions }: any) => {
 		return (
-			<div className="listingSection__wrap">
+			<div className="listingSection__wrap cstm-padding">
 				<div>
 					<h2 className="text-2xl font-semibold">Local Attractions </h2>
 				</div>
 				{/* 6 */}
-				<div className="flex gap-5 flex-wrap">
+				<div className="flex gap-5 flex-wrap mt-3">
 					{attractions?.filter((_: any, i: number) => i < 12).map((item: any) => (
-						<div key={item.id} className="flex items-center space-x-3">
+						<div key={item.id} className="flex items-center space-x-2">
 							<strong className='text-[1.5rem] text-gray-500'>&bull;</strong>
 							<span className=" ">{item?.name} ({item?.property_distance} km)</span>
 						</div>
@@ -926,16 +954,16 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ }) => {
 
 	const renderSection13 = ({ excursions }: any) => {
 		return (
-			<div className="listingSection__wrap">
+			<div className="listingSection__wrap cstm-padding">
 				<div>
 					<h2 className="text-2xl font-semibold">Excursions </h2>
 				</div>
 				{/* 6 */}
-				<div className="flex gap-5 flex-wrap">
+				<div className="flex gap-5 flex-wrap mt-3">
 					{excursions?.filter((_: any, i: number) => i < 12).map((item: any) => (
 						<div key={item.id} className="flex items-center space-x-3">
 							<strong className='text-[1.5rem] text-gray-500'>&bull;</strong>
-							<span className=" ">{item?.name} ({item?.property_distance} km)</span>
+							<span className=" ">{item?.name} ({item?.property_distance})</span>
 						</div>
 					))}
 				</div>
@@ -945,7 +973,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ }) => {
 
 	const renderSidebar = ({ result }: any) => {
 		return (
-			<div className="listingSectionSidebar__wrap shadow-xl mt-[6rem] sm:mt-0">
+			<div className="listingSectionSidebar__wrap shadow-xl mt-[6rem] sm:mt-0 cstm-padding">
 				{/* PRICE */}
 				<div className="flex justify-between">
 					<span className="text-xl font-semibold">
@@ -959,29 +987,30 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ }) => {
 				</div>
 
 
-				{selectRoomFirstWarning && <span className='text-red-500 text-sm'>Kindly select any room to continue</span>}
-				{selectGuestWarning && <span className='text-red-500 text-sm'>Kindly select the guests</span>}
-				{guestLimitExceed && <span className='text-red-500 text-sm'>Kindly add more room / select extra guest</span>}
+				{selectRoomFirstWarning && <span className='text-red-500 text-sm mt-3'>Kindly select any room to continue</span>}
+				{selectGuestWarning && <span className='text-red-500 text-sm mt-3'>Kindly select the guests</span>}
+				{guestLimitExceed && <span className='text-red-500 text-sm mt-3'>Kindly add more room / select extra guest</span>}
 
 				{/* FORM */}
-				<form className="flex flex-col rounded-3xl border border-neutral-200 dark:border-neutral-700">
-					<StayDatesRangeInput previousPrice={currentroomPrice} propertyDates={result?.property_dates} setDaysToStay={setDaysToStay} startDate={startDate} setStartDate={setStartDate} endDate={endDate} setEndDate={setEndDate} className="z-[11] flex-1" />
+				<form className="flex flex-col rounded-3xl border border-neutral-200 dark:border-neutral-700 mt-3">
+					<StayDatesRangeInput previousPrice={currentroomPrice} propertyDates={result?.property_dates} setDaysToStay={setDaysToStay} startDate={startDate} setStartDate={setStartDate} endDate={endDate} setEndDate={setEndDate} className="z-[11] flex-1 cstm-btn-padding" />
 					<div className="w-full border-b border-neutral-200 dark:border-neutral-700"></div>
-					<GuestsInput
-					setNumberOfRoomSelected={setNumberOfRoomSelected}
-					 numberOfRoomSelected={numberOfRoomSelected} 
-					 guestLimitExceed={guestLimitExceed} 
-					 setGuestLimitExceed={setGuestLimitExceed}
-					  currentActiveRoom={currentActiveRoom} 
-					  guestAdultsInputValue={guestAdultsInputValue}
-					   guestChildrenInputValue={guestChildrenInputValue}
-					   extraGuest={extraGuest}                      // ✅ Pass it
-					   setExtraGuest={setExtraGuest}   
-					    guestInfantsInputValue={guestInfantsInputValue} 
+						<GuestsInput
+						setNumberOfRoomSelected={setNumberOfRoomSelected}
+						numberOfRoomSelected={numberOfRoomSelected} 
+						guestLimitExceed={guestLimitExceed} 
+						setGuestLimitExceed={setGuestLimitExceed}
+						currentActiveRoom={currentActiveRoom} 
+						guestAdultsInputValue={guestAdultsInputValue}
+						guestChildrenInputValue={guestChildrenInputValue}
+						listingDetails={listingDetail}
+						extraGuest={extraGuest}                     
+						setExtraGuest={setExtraGuest}   
+						guestInfantsInputValue={guestInfantsInputValue} 
 						setGuestAdultsInputValue={setGuestAdultsInputValue} 
 						setGuestChildrenInputValue={setGuestChildrenInputValue} 
 						setGuestInfantsInputValue={setGuestInfantsInputValue}
-						 className="flex-1" />
+						className="flex-1 cstm-btn-padding" />
 				</form>
 
 				{/* extra guest  */}
@@ -1006,23 +1035,52 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ }) => {
 				{/* SUM */}
 				{
 					roomPrice !== 0 &&
-					<div className="flex flex-col space-y-4">
-						<div className="flex justify-between text-neutral-600 dark:text-neutral-300">
-							<span>
+					<div className="flex flex-col space-y-1 mt-3">
+						{selectedRooms.length > 0 && (
+						<div className="flex flex-col space-y-1 text-neutral-600 dark:text-neutral-300">
+							{selectedRooms.map((room, index) => (
+							<div key={index} className="flex justify-between">
+								<span>
+								₹ {room.room_price}
+								<span className="text-xs">/night</span> {room.type} (
+								{room.count} <span className="text-xs">room</span> x{" "}
+								{daysToStay.toFixed(0)} <span className="text-xs">day</span>)
+								</span>
+								<span>₹ {(room.room_price * room.count * daysToStay).toFixed(0)}</span>
+							</div>
+							))}
+						</div>
+						)}
+						{/* <div className="flex justify-between text-neutral-600 dark:text-neutral-300"> */}
+							{/* <span> */}
 								{/* <div>₹ {roomPrice} x {daysToStay} night</div> */}
-								<div>₹ {currentroomPrice}<span className='text-xs'>/night</span>  ({numberOfRoomSelected} <span className='text-xs'>room</span> x {daysToStay.toFixed(0)} <span className='text-xs'>day</span>)</div>
+								{/* <div>₹ {currentroomPrice}<span className='text-xs'>/night</span>  ({numberOfRoomSelected} <span className='text-xs'>room</span> x {daysToStay.toFixed(0)} <span className='text-xs'>day</span>)</div>
 								{workationDiscount > 0 && <div className='text-xs text-red-500'>{`Discount: ${workationDiscount}%`}</div>}
-							</span>
-							<span>
+							</span> */}
+							
+							{/* <span className='test'>
 								<div>₹ {surgedPrice - (extraGuest * currentActiveRoom?.guest_fee)}</div>
 								{workationDiscount > 0 && <span className='text-xs line-through'>₹ {roomPrice * daysToStay}</span>}
-							</span>
-						</div>
-						{extraGuest > 0 &&
+							</span> */}
+						{/* </div> */}
+						{/* {extraGuest > 0 &&
 							<div className="flex justify-between text-neutral-600 dark:text-neutral-300">
 								<span>Extra Guest ({extraGuest} x ₹{currentActiveRoom?.guest_fee})</span>
 								<span>₹ {(extraGuest * currentActiveRoom?.guest_fee).toFixed(2)}</span>
-							</div>}
+							</div>} */}
+							{guestChildrenInputValue > 0 &&
+								<div className="flex justify-between text-neutral-600 dark:text-neutral-300">
+										<span>Children ({guestChildrenInputValue} x ₹{(currentActiveRoom?.guest_fee)/2} x {daysToStay.toFixed(0)} <span className="text-xs">day</span>)</span>
+										<span>₹ {(guestChildrenInputValue * ((currentActiveRoom?.guest_fee)/2) * daysToStay) .toFixed(0)}</span>
+									</div>
+							}
+							{extraGuest > 0 &&
+									<div className="flex justify-between text-neutral-600 dark:text-neutral-300">
+										<span>Extra Guest ({extraGuest} x ₹{currentActiveRoom?.guest_fee} x {daysToStay.toFixed(0)} <span className="text-xs">day</span>)</span>
+										<span>₹ {((extraGuest * currentActiveRoom?.guest_fee) * daysToStay).toFixed(0)}</span>
+									</div>
+									}
+							
 						<div className="flex justify-between text-neutral-600 dark:text-neutral-300">
 							<span>Convenience Fee ({convenienceFee}%)</span>
 							<span>₹ {((convenienceFee / 100) * surgedPrice)}</span>
@@ -1057,17 +1115,20 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ }) => {
 						<div className="border-b border-neutral-200 dark:border-neutral-700"></div>
 						<div className="flex justify-between font-semibold">
 							<span>Total</span>
-							<span className='flex'>₹<PriceCalculator totalPrice={totalPrice} setTotalPrice={setTotalPrice} extraGuest={extraGuest} extraGuestPrice={currentActiveRoom?.guest_fee} setWorkationDiscount={setWorkationDiscount} propertyType={listingDetail?.result?.property_type?.name} daysToStay={daysToStay.toFixed(2)} workStation={listingDetail?.WorkStation} startDate={startDate} endDate={endDate} normalFare={roomPrice} propertyDates={propertyDates} setSurgedPrice={setSurgedPrice} convenienceFee={convenienceFee} gst={gst} /></span>
+							<span className='flex'>₹<PriceCalculator totalPrice={totalPrice} setTotalPrice={setTotalPrice} extraGuest={extraGuest} extraGuestPrice={(currentActiveRoom?.guest_fee)*daysToStay} guestChildrenInputValue={guestChildrenInputValue} childrenPricePerHead={((currentActiveRoom?.guest_fee ?? 0) / 2)*daysToStay} setWorkationDiscount={setWorkationDiscount} propertyType={listingDetail?.result?.property_type?.name} daysToStay={daysToStay.toFixed(2)} workStation={listingDetail?.WorkStation} startDate={startDate} endDate={endDate} normalFare={roomPrice} propertyDates={propertyDates} setSurgedPrice={setSurgedPrice} convenienceFee={convenienceFee} gst={gst} /></span>
 						</div>
 					</div>
 				}
-
+				
+               
+					
+					
 				{/* SUBMIT */}
 				{/* <ButtonPrimary href={'/checkout'} >Reserve</ButtonPrimary> */}
 				<ModalReserveMobile
 					renderChildren={({ openModal }) => (
 						<ButtonPrimary
-							sizeClass="px-5 sm:px-7 py-3 !rounded-2xl"
+							sizeClass="px-5 sm:px-7 py-3 mt-3 !rounded-2xl"
 							// onClick={openModal}
 							// onClick={numberOfRoomSelected == 0 ? ()=>setGuestLimitExceed(true) : openModal}
 							onClick={() => handleErrorMessageDisplay(openModal)}
@@ -1145,232 +1206,267 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ }) => {
 	}
 
 
-	const renderRoomSection = ({ rooms }: any) => {
-		// console.log(categorizedRooms,"ldk;lfklds")
-		return (
-			<>
-				<div className='listingSection__wrap'>
-					{
-						categorizedRooms?.map((item: any) => (
-							<div className="flex w-full justify-center border-t first:border-t-0" key={item?.room_type}>
+		const renderRoomSection = ({ rooms }: any) => {
+			// console.log(categorizedRooms,"ldk;lfklds")
+			return (
+				<>
+					<div className='listingSection__wrap cstm-padding'>
+						{
+							categorizedRooms?.map((item: any) => (
+								<div className="flex w-full justify-center border-b last:border-b-0 mt-3" key={item?.room_type}>
 
-								<div className="nc-StayCard2 grid grid-cols-1 sm:grid-cols-3 gap-5 group relative w-full border-t border-neutral-200 dark:border-neutral-800 pt-5">
-									{getImageUrlsBySpaceType(item?.space_type).length > 0 &&
+									<div className="nc-StayCard2 grid grid-cols-1 sm:grid-cols-3 gap-5 group relative w-full dark:border-neutral-800 pb-3">
+										{getImageUrlsBySpaceType(item?.space_type).length > 0 &&
 
-										<div className="relative w-full" >
-											<GallerySlider3
-												uniqueID="StayCard2_sampleID"
-												ratioClass="aspect-w-6 aspect-h-4"
-												galleryImgs={getImageUrlsBySpaceType(item?.space_type)}
-												galleryImgsMsg={getImageMessageBySpaceType(item?.space_type)}
-												imageClass="rounded-lg"
-												href="javascript:void(0)"
-												onImageClick={() => setActiveModal(item?.space_type)}
-											/>
-											{/* <div className='mt-2' onClick={() => setActiveModal(item?.space_type)}>
-												
-												<Badge name={`${getImageUrlsBySpaceType(item?.space_type).length} Photos →`} color="red" className='cursor-pointer' />
-											</div> */}
-										</div>}
+											<div className="relative w-full" >
+												<GallerySlider3
+													uniqueID="StayCard2_sampleID"
+													ratioClass="aspect-w-6 aspect-h-4"
+													galleryImgs={getImageUrlsBySpaceType(item?.space_type)}
+													galleryImgsMsg={getImageMessageBySpaceType(item?.space_type)}
+													imageClass="rounded-lg"
+													href="javascript:void(0)"
+													onImageClick={() => setActiveModal(item?.space_type)}
+												/>
+												{/* <div className='mt-2' onClick={() => setActiveModal(item?.space_type)}>
+													
+													<Badge name={`${getImageUrlsBySpaceType(item?.space_type).length} Photos →`} color="red" className='cursor-pointer' />
+												</div> */}
+											</div>}
 
-									<div className='col-span-2'>
-										<div className="mt-3 space-y-3">
+										<div className='col-span-2'>
+											<div className="mt-3 space-y-3">
 
-											<div className="flex items-start justify-between">
-												<div>
-													<p className="text-lg font-bold">
-														{item?.room_type}
-													</p>
-													<div className="flex items-center justify-between space-x-5 mt-3 text-sm text-neutral-700 dark:text-neutral-300 xl:justify-start">
+												<div className="flex items-start justify-between">
+													<div>
+														<p className="text-lg font-bold">
+															{item?.room_type}
+														</p>
+														<div className="flex items-center justify-between space-x-5 mt-3 text-sm text-neutral-700 dark:text-neutral-300 xl:justify-start">
 
-														<div className="text-center">
-															<img className='h-6' src="/user.png" alt="userimage" />
-															<p>x {item.accommodates}</p>
+															<div className="text-center">
+																<img className='h-6' src="/user.png" alt="userimage" />
+																<p>x {item.accommodates}</p>
+															</div>
+
+															<div className="text-center">
+																<svg
+																	xmlns="http://www.w3.org/2000/svg"
+																	viewBox="0 0 24 24"
+																	width={24}
+																	height={24}
+																	color={'currentColor'}
+																	fill={'none'}
+																	className="h-6 w-6"
+																>
+																	<path
+																		d="M22 17.5H2"
+																		stroke="currentColor"
+																		strokeWidth="1.5"
+																		strokeLinecap="round"
+																		strokeLinejoin="round"
+																	/>
+																	<path
+																		d="M22 21V16C22 14.1144 22 13.1716 21.4142 12.5858C20.8284 12 19.8856 12 18 12H6C4.11438 12 3.17157 12 2.58579 12.5858C2 13.1716 2 14.1144 2 16V21"
+																		stroke="currentColor"
+																		strokeWidth="1.5"
+																		strokeLinecap="round"
+																		strokeLinejoin="round"
+																	/>
+																	<path
+																		d="M16 12V10.6178C16 10.1103 15.9085 9.94054 15.4396 9.7405C14.4631 9.32389 13.2778 9 12 9C10.7222 9 9.53688 9.32389 8.5604 9.7405C8.09154 9.94054 8 10.1103 8 10.6178L8 12"
+																		stroke="currentColor"
+																		strokeWidth="1.5"
+																		strokeLinecap="round"
+																	/>
+																	<path
+																		d="M20 12V7.36057C20 6.66893 20 6.32311 19.8292 5.99653C19.6584 5.66995 19.4151 5.50091 18.9284 5.16283C16.9661 3.79978 14.5772 3 12 3C9.42282 3 7.03391 3.79978 5.07163 5.16283C4.58492 5.50091 4.34157 5.66995 4.17079 5.99653C4 6.32311 4 6.66893 4 7.36057V12"
+																		stroke="currentColor"
+																		strokeWidth="1.5"
+																		strokeLinecap="round"
+																	/>
+																</svg>
+																<p>x {item?.beds}</p>
+															</div>
+															<div className="text-center">
+																<svg
+																	xmlns="http://www.w3.org/2000/svg"
+																	viewBox="0 0 24 24"
+																	width={24}
+																	height={24}
+																	color={'currentColor'}
+																	fill={'none'}
+																	className="h-6 w-6"
+																>
+																	<path
+																		d="M6 20L5 21M18 20L19 21"
+																		stroke="currentColor"
+																		strokeWidth="1.5"
+																		strokeLinecap="round"
+																	/>
+																	<path
+																		d="M3 12V13C3 16.2998 3 17.9497 4.02513 18.9749C5.05025 20 6.70017 20 10 20H14C17.2998 20 18.9497 20 19.9749 18.9749C21 17.9497 21 16.2998 21 13V12"
+																		stroke="currentColor"
+																		strokeWidth="1.5"
+																		strokeLinecap="round"
+																		strokeLinejoin="round"
+																	/>
+																	<path
+																		d="M2 12H22"
+																		stroke="currentColor"
+																		strokeWidth="1.5"
+																		strokeLinecap="round"
+																	/>
+																	<path
+																		d="M4 12V5.5234C4 4.12977 5.12977 3 6.5234 3C7.64166 3 8.62654 3.73598 8.94339 4.80841L9 5"
+																		stroke="currentColor"
+																		strokeWidth="1.5"
+																		strokeLinecap="round"
+																	/>
+																	<path
+																		d="M8 6L10.5 4"
+																		stroke="currentColor"
+																		strokeWidth="1.5"
+																		strokeLinecap="round"
+																	/>
+																</svg>
+																<p>x 1</p>
+															</div>
+
+
+
+
+
 														</div>
-
-														<div className="text-center">
-															<svg
-																xmlns="http://www.w3.org/2000/svg"
-																viewBox="0 0 24 24"
-																width={24}
-																height={24}
-																color={'currentColor'}
-																fill={'none'}
-																className="h-6 w-6"
-															>
-																<path
-																	d="M22 17.5H2"
-																	stroke="currentColor"
-																	strokeWidth="1.5"
-																	strokeLinecap="round"
-																	strokeLinejoin="round"
-																/>
-																<path
-																	d="M22 21V16C22 14.1144 22 13.1716 21.4142 12.5858C20.8284 12 19.8856 12 18 12H6C4.11438 12 3.17157 12 2.58579 12.5858C2 13.1716 2 14.1144 2 16V21"
-																	stroke="currentColor"
-																	strokeWidth="1.5"
-																	strokeLinecap="round"
-																	strokeLinejoin="round"
-																/>
-																<path
-																	d="M16 12V10.6178C16 10.1103 15.9085 9.94054 15.4396 9.7405C14.4631 9.32389 13.2778 9 12 9C10.7222 9 9.53688 9.32389 8.5604 9.7405C8.09154 9.94054 8 10.1103 8 10.6178L8 12"
-																	stroke="currentColor"
-																	strokeWidth="1.5"
-																	strokeLinecap="round"
-																/>
-																<path
-																	d="M20 12V7.36057C20 6.66893 20 6.32311 19.8292 5.99653C19.6584 5.66995 19.4151 5.50091 18.9284 5.16283C16.9661 3.79978 14.5772 3 12 3C9.42282 3 7.03391 3.79978 5.07163 5.16283C4.58492 5.50091 4.34157 5.66995 4.17079 5.99653C4 6.32311 4 6.66893 4 7.36057V12"
-																	stroke="currentColor"
-																	strokeWidth="1.5"
-																	strokeLinecap="round"
-																/>
-															</svg>
-															<p>x {item?.beds}</p>
-														</div>
-														<div className="text-center">
-															<svg
-																xmlns="http://www.w3.org/2000/svg"
-																viewBox="0 0 24 24"
-																width={24}
-																height={24}
-																color={'currentColor'}
-																fill={'none'}
-																className="h-6 w-6"
-															>
-																<path
-																	d="M6 20L5 21M18 20L19 21"
-																	stroke="currentColor"
-																	strokeWidth="1.5"
-																	strokeLinecap="round"
-																/>
-																<path
-																	d="M3 12V13C3 16.2998 3 17.9497 4.02513 18.9749C5.05025 20 6.70017 20 10 20H14C17.2998 20 18.9497 20 19.9749 18.9749C21 17.9497 21 16.2998 21 13V12"
-																	stroke="currentColor"
-																	strokeWidth="1.5"
-																	strokeLinecap="round"
-																	strokeLinejoin="round"
-																/>
-																<path
-																	d="M2 12H22"
-																	stroke="currentColor"
-																	strokeWidth="1.5"
-																	strokeLinecap="round"
-																/>
-																<path
-																	d="M4 12V5.5234C4 4.12977 5.12977 3 6.5234 3C7.64166 3 8.62654 3.73598 8.94339 4.80841L9 5"
-																	stroke="currentColor"
-																	strokeWidth="1.5"
-																	strokeLinecap="round"
-																/>
-																<path
-																	d="M8 6L10.5 4"
-																	stroke="currentColor"
-																	strokeWidth="1.5"
-																	strokeLinecap="round"
-																/>
-															</svg>
-															<p>x 1</p>
-														</div>
-
-
-
-
-
 													</div>
-												</div>
-												<div className="flex items-start flex-col">
-													<p className="text-base font-semibold">
-														₹{item?.room_price} <span className="text-sm text-neutral-500 dark:text-neutral-400">/1 nights</span>
-													</p>
+													<div className="flex items-start flex-col">
+														<p className="text-base font-semibold">
+															₹{item?.room_price} <span className="text-sm text-neutral-500 dark:text-neutral-400">/1 nights</span>
+														</p>
 
 
 
-													<form>
+														<form>
 
 
 
-														<select
-															id="rooms"
-															className="bg-gray-50 w-full min-w-[9rem] my-2 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-[#111827] dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+															<select
+																id="rooms"
+																className="bg-gray-50 w-full min-w-[9rem] my-2 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-[#111827] dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
 															onChange={(e) => {
-																const selectedValue = parseInt(e.target.value);
-																const selectedIndex = e.target.selectedIndex - 1; // subtract 1 for the "Select" option
+																	const selectedValue = parseInt(e.target.value);
+																	const roomKey = item?.space_type; // Or use item.id or room_type as unique key
 
-																if (selectedValue === 0) {
-																	const resetRoom = { type: '', count: 1, accommodates: 0, guest_fee: 0 };
-																	setCurrentActiveRoom(resetRoom);
-																	setRoomPrice(0);
-																	setNumberOfRoomSelected(0);
-																	localStorage.removeItem("selectedRoom");
-																} else {
-																	const selectedRoomData = {
-																		type: item?.room_type,
-																		count: selectedValue,
-																		accommodates: item?.accommodates,
-																		guest_fee: item?.guest_fee,
-																		room_price: item?.room_price,
-																		room_id: item?.roomid,
-																		space_type: rooms?.space_type,
-																		selected_index: selectedIndex // <-- Store the index
-																	};
+																	let updatedRooms = [...selectedRooms];
 
-																	setCurrentActiveRoom(selectedRoomData);
-																	setRoomPrice(selectedValue * item?.room_price);
-																	setNumberOfRoomSelected(selectedValue);
+																	// Remove existing entry if any
+																	updatedRooms = updatedRooms.filter(r => r.space_type !== roomKey);
 
-																	// Save to localStorage
-																	localStorage.setItem("selectedRoom", JSON.stringify(selectedRoomData));
-																}
-															}}
-														>
-															<option value='0' selected={currentActiveRoom.type !== item?.room_type}>
-																Select {item?.room_type}
-															</option>
-															{[...Array(item?.total_rooms)].map((_, index) => {
-																const value = index + 1;
-																return (
-																	<option key={value} value={value}>
-																		{value} {item?.room_type}
-																	</option>
-																);
-															})}
-														</select>
+																	if (selectedValue > 0) {
+																		const newRoom = {
+																			type: item?.room_type,
+																			count: selectedValue,
+																			accommodates: item?.accommodates,
+																			guest_fee: item?.guest_fee,
+																			room_price: item?.room_price,
+																			room_id: item?.id,
+																			space_type: item?.space_type
+																		};
+																		updatedRooms.push(newRoom);
+																	}
 
-													</form>
+																	setSelectedRooms(updatedRooms);
+
+																	// Calculate total price
+																	const total = updatedRooms.reduce((acc, room) => acc + room.room_price * room.count, 0);
+																	setRoomPrice(total);
+
+																	// Store in localStorage if needed
+																	localStorage.setItem("selectedRooms", JSON.stringify(updatedRooms));
+																	// Determine guest fee
+																	let updatedGuestFee = 0;
+																	// const totalRoomCount = updatedRooms.reduce((acc, room) => acc + room.count, 0);
+
+																	if (total === 1) {
+																		const singleRoom = updatedRooms.find(r => r.count === 1);
+																		updatedGuestFee = singleRoom?.guest_fee || 0;
+																	} else if (total > 1) {
+																		const guestFees = updatedRooms.flatMap(room => Array(room.count).fill(room.guest_fee));
+																		updatedGuestFee = Math.min(...guestFees);
+																	}
+
+																	setCurrentActiveRoom((prev: any)=> ({
+																		...prev,
+																		guest_fee: updatedGuestFee
+																	}));
+																}}
+
+															>
+																<option value='0' selected={currentActiveRoom.type !== item?.room_type}>
+																	Select {item?.room_type}
+																</option>
+																{[...Array(item?.total_rooms)].map((_, index) => {
+																	const value = index + 1;
+																	return (
+																		<option key={value} value={value}>
+																			{value} {item?.room_type}
+																		</option>
+																	);
+																})}
+															</select>
+
+														</form>
+													</div>
 												</div>
 											</div>
 										</div>
 									</div>
+
+									{/* room modal image gallery  */}
+									<CustomRoomModal
+										key={item?.room_type}
+										isOpen={activeModal === item?.space_type}
+										closeModal={() => setActiveModal(null)}
+										title={`${item?.room_type} Room`}
+									>
+										<GallerySlider3
+											uniqueID="StayCard2_sampleID"
+											ratioClass="aspect-w-6 aspect-h-4"
+											galleryImgs={getImageUrlsBySpaceType(item?.space_type)}
+											galleryImgsMsg={getImageMessageBySpaceType(item?.space_type)}
+											imageClass="rounded-lg"
+											href="javascript:void(0)"
+										/>
+									</CustomRoomModal>
 								</div>
-
-								{/* room modal image gallery  */}
-								<CustomRoomModal
-									key={item?.room_type}
-									isOpen={activeModal === item?.space_type}
-									closeModal={() => setActiveModal(null)}
-									title={`${item?.room_type} Room`}
-								>
-									<GallerySlider3
-										uniqueID="StayCard2_sampleID"
-										ratioClass="aspect-w-6 aspect-h-4"
-										galleryImgs={getImageUrlsBySpaceType(item?.space_type)}
-										galleryImgsMsg={getImageMessageBySpaceType(item?.space_type)}
-										imageClass="rounded-lg"
-										href="javascript:void(0)"
-									/>
-								</CustomRoomModal>
+							))
+						}
+					
+						{amenities?.Inclusive.length > 0 && (
+						<>
+							<div className="mr-t-5"> <span className="text-base font-semibold">Inclusive : </span>
+							
+								
+							{amenities?.Inclusive.map((item: any) => {
+									
+								return(
+								<span key={item.id}>
+								<strong className="text-[1.5rem] text-gray-500 align-middle">&bull;</strong>
+								<span>{item.title}</span>
+								</span>)})}
+							
 							</div>
-						))
-					}
-				</div>
-			</>
-		)
-	}
+						</>)}
+					</div>
+				</>
+			)
+		}
 
-
+		
 	const { result, amenities, attractions, excursions, rooms } = listingDetail ?? {}; // Use nullish coalescing (??) to provide a fallback empty object
 	const { description } = listingDescription ?? {};
-
+	console.log(rooms, "rooms");
+ //console.log("result",result)
 
 	return (
 		<div className="nc-ListingStayDetailPage">
@@ -1429,7 +1525,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ }) => {
 			{/* MAIN */}
 			<main className={`relative ${activeModal == null ? 'z-10' : 'z-40'} mt-11 flex flex-col lg:flex-row`}>
 				{/* CONTENT */}
-				<div className="w-full space-y-8 lg:w-3/5 xl:w-2/3 lg:space-y-5 lg:pr-10 overflow-y-auto h-full">
+				<div className="w-full space-y-5 lg:w-3/5 xl:w-2/3 lg:space-y-5 lg:pr-10 overflow-y-auto h-full">
 					{renderSection1({ result })}
 					{rooms?.length > 0 && renderRoomSection({ rooms })}
 					<SectionDateRange
@@ -1461,7 +1557,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ }) => {
 
 				{/* SIDEBAR */}
 				<div className="mt-14 flex-grow lg:mt-0 lg:block" id='sidebarr'>
-					<div className="sticky top-24">{renderSidebar({ result })}</div>
+					<div className="sticky top-32">{renderSidebar({ result })}</div>
 				</div>
 
 				{/* mobile sidebar  */}

@@ -17,10 +17,13 @@ interface PriceCalculatorProps {
   daysToStay?: any;
   workStation?: any;
   setWorkationDiscount?: any;
+  guestChildrenInputValue?: number;
+  childrenPricePerHead?: number;
   extraGuestPrice?: any;
   extraGuest?: any;
   totalPrice?: any;
   setTotalPrice?: any;
+
 }
 
 const PriceCalculator = ({
@@ -36,7 +39,9 @@ const PriceCalculator = ({
   workStation,
   setWorkationDiscount,
   extraGuestPrice, extraGuest,
-  totalPrice, setTotalPrice
+  totalPrice, setTotalPrice,
+  guestChildrenInputValue,
+  childrenPricePerHead  
 }: PriceCalculatorProps) => {
   // const [totalPrice, setTotalPrice] = useState<number>(0);
 
@@ -69,6 +74,10 @@ const PriceCalculator = ({
         console.log("extrea gesut fee::" , extraGuestFee)
         total += extraGuestFee
       }
+      if (guestChildrenInputValue && childrenPricePerHead) {
+          const childFee = guestChildrenInputValue * childrenPricePerHead;
+          total += childFee;
+        }
 
       // if(propertyType === 'Workstation'){
       //   for(const item of workStation){
@@ -120,7 +129,7 @@ const PriceCalculator = ({
     };
 
     calculateTotalPrice();
-  }, [startDate,endDate,normalFare,propertyDates,setSurgedPrice,convenienceFee,gst,daysToStay,propertyType,workStation,setWorkationDiscount,extraGuestPrice, extraGuest,totalPrice, setTotalPrice]); // Added surgedPrice to dependencies
+  }, [startDate,endDate,normalFare,propertyDates,setSurgedPrice,convenienceFee,gst,daysToStay,propertyType,workStation,setWorkationDiscount,extraGuestPrice, extraGuest, guestChildrenInputValue, childrenPricePerHead, totalPrice, setTotalPrice]); // Added surgedPrice to dependencies
 
   return <p>{totalPrice.toFixed(2)}</p>;
 };

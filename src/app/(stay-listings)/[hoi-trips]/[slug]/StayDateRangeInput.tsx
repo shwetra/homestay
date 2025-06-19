@@ -57,7 +57,7 @@ const StayDatesRangeInput: FC<StayDatesRangeInputProps> = ({
   }
 
   return (
-    <Popover className={`StayDatesRangeInput relative z-10 flex cstm-btn-padding ${className}`}>
+    <Popover className={`StayDatesRangeInput relative z-10 flex ${className}`}>
       {({ open, close }) => (
         <>
           <PopoverButton
@@ -80,7 +80,7 @@ const StayDatesRangeInput: FC<StayDatesRangeInputProps> = ({
             leaveTo="opacity-0 translate-y-1"
           >
             <PopoverPanel className="absolute left-auto right-0 top-full z-10 mt-3 w-screen max-w-sm px-4 sm:px-0 lg:max-w-3xl xl:-right-10">
-              <div className="overflow-hidden rounded-3xl bg-white p-3 shadow-lg ring-1 ring-black ring-opacity-5 dark:bg-neutral-800 ">
+              <div className="overflow-hidden rounded-3xl bg-white p-8 shadow-lg ring-1 ring-black ring-opacity-5 dark:bg-neutral-800">
                 <DatePicker
                   selected={startDate}
                   onChange={(date) => onChangeDate(date as Date, close)}
@@ -107,11 +107,11 @@ const StayDatesRangeInput: FC<StayDatesRangeInputProps> = ({
 												<div className={`text-sm ${isPast ? 'line-through text-red-400' : ''}`}>
 													<DatePickerCustomDay dayOfMonth={day} date={date} />
 												</div>
-												{/* {price !== null ? (
+												{price !== null ? (
 													<div className="property-price text-[10px] text-gray-500">
 														₹{totalPrice}
 													</div>
-												):(<div className="property-price text-[10px] text-gray-500">₹{'00'}</div>)} */}
+												):(<div className="property-price text-[10px] text-gray-500">₹{'00'}</div>)}
 											</div>
                     );
                   }}

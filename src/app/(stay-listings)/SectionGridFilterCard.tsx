@@ -17,8 +17,7 @@ const DEMO_DATA: StayDataType[] = DEMO_STAY_LISTINGS.filter((_, i) => i < 8);
 
 const itemsPerPage = 20;
 
-const 
-SectionGridFilterCard: FC<SectionGridFilterCardProps> = ({
+const SectionGridFilterCard: FC<SectionGridFilterCardProps> = ({
   className = "",
   data = DEMO_DATA,
 }) => {

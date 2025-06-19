@@ -15,6 +15,7 @@ import StartRating from '@/components/StartRating'
 import parse from 'html-react-parser';
 import GuestsInput from './GuestsInput';
 import { toast } from 'react-toastify'
+import ToastAlert from '@/components/ToastAlert';
 import {  ArrowRightIcon, ArrowLeftIcon ,CalendarIcon,
 	MapPinIcon,
 	Squares2X2Icon,
@@ -117,102 +118,43 @@ const HoiTripsDetails = () => {
     setIsModalOpen(false);
   };
 
-  //  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-  //   e.preventDefault();
-  //   setSuccess(false);
-  //   const payload = {
-  //     ...formData,
-  //     start_date: startDate,
-  //     guest:guestTotal,
-  //     hoitrip_id: trip?.id,
-  //     total: trip?.price,
-  //     status:0, 
-  //   };
-  //   try {
-  //     await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/hoitrip/booking`, payload, {
-  //       headers: {
-  //         "x-api-key": process.env.NEXT_PUBLIC_X_API_KEY || "",
-  //       },
-  //     });
-      
-  //     setSuccess(true); 
-  //     setFormData({
-  //     first_name: '',
-  //     last_name: '',
-  //     email: '',
-  //     phone: '',
-  //     message: '',
-  //   });
-  //   setStartDate(null);
-  //   setGuestTotal(1);
-  //   toast.success(' Booking Confirm successfully!');
-  //   router.push('/pay-done',);
-  //   } catch (error) {
-  //     console.error("Booking failed:", error);
-  //   }
-  // };
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-  e.preventDefault();
-  setSuccess(false);
-
-  const payload = {
-    ...formData,
-    start_date: startDate,
-    guest: guestTotal,
-    hoitrip_id: trip?.id,
-    total: trip?.price,
-    status: 0,
-  };
-
-  try {
-    const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/hoitrip/booking`, payload, {
-      headers: {
-        "x-api-key": process.env.NEXT_PUBLIC_X_API_KEY || "",
-      },
-    });
-
-    
-    const bookingData = res.data?.data;
-
-    if (bookingData) {
-      setSuccess(true);
-      toast.success('Booking Confirm successfully!');
-
-      
-      setFormData({
-        first_name: '',
-        last_name: '',
-        email: '',
-        phone: '',
-        message: '',
+   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setSuccess(false);
+    const payload = {
+      ...formData,
+      start_date: startDate,
+      guest:guestTotal,
+      hoitrip_id: trip?.id,
+      total: trip?.price,
+      status:0, 
+    };
+    try {
+      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/hoitrip/booking`, payload, {
+        headers: {
+          "x-api-key": process.env.NEXT_PUBLIC_X_API_KEY || "",
+        },
       });
-      setStartDate(null);
-      setGuestTotal(1);
-
-      
-     router.push(`/pay-done?${new URLSearchParams({
-        trx: bookingData.trx,
-        first_name: bookingData.first_name,
-        last_name: bookingData.last_name,
-        start_date: bookingData.start_date,
-        guest: bookingData.guest,
-        package_price: bookingData.package_price,
-        package_name: bookingData.package_name,
-      })}`);
-
+      setSuccess(true); 
+      setFormData({
+      first_name: '',
+      last_name: '',
+      email: '',
+      phone: '',
+      message: '',
+    });
+    setStartDate(null);
+    setGuestTotal(1);
+    toast.success(' Booking Confirm successfully!');
+    router.push('/pay-done');
+    } catch (error) {
+      console.error("Booking failed:", error);
     }
-
-  } catch (error) {
-    console.error("Booking failed:", error);
-    toast.error("Booking failed! Please try again.");
-  }
-};
-
+  };
 	const renderSection1 = ({ result }: any) => {
-		
+		// console.log(result,"rddgg")
 		return (
-			<div className="listingSection__wrap cstm-padding !space-y-3">
+			<div className="listingSection__wrap !space-y-6">
 			
 
 				
@@ -221,7 +163,7 @@ const HoiTripsDetails = () => {
 				</h2>
 
 			
-				<div className="flex items-center space-x-4 ">
+				<div className="flex items-center space-x-4">
 					<div className="flex items-start">
 						<MapPinIcon className="h-5 w-5" />
 						
@@ -273,15 +215,15 @@ const HoiTripsDetails = () => {
 	}
     const renderSection2 = ({ description }: any) => {
             return (
-                <div className="listingSection__wrap cstm-padding">
+                <div className="listingSection__wrap">
                     <h2 className="text-2xl font-semibold">Stay information</h2>
                     {/* <div className="w-14 border-b border-neutral-200 dark:border-neutral-700"></div> */}
-                    <div className="text-neutral-600 dark:text-neutral-300 mt-3">
+                    <div className="text-neutral-600 dark:text-neutral-300">
                         <span>
                             {description?.description ? parse(description?.description) : ''}
                         </span>
                     </div>
-                    <div className="text-neutral-600 dark:text-neutral-300 mt-3">
+                    <div className="text-neutral-600 dark:text-neutral-300">
                         <span>
                             {description?.content ? parse(description?.content) : ''}
                         </span>
@@ -291,24 +233,24 @@ const HoiTripsDetails = () => {
      }   
       const includesExcludes = ({ includeExclude }: any) => {
             return (
-                <div className="listingSection__wrap cstm-padding">
+                <div className="listingSection__wrap">
                     
                     {/* <div className="w-14 border-b border-neutral-200 dark:border-neutral-700"></div> */}
-                    <div className="text-neutral-600 dark:text-neutral-300 mt-3">
+                    <div className="text-neutral-600 dark:text-neutral-300">
                         <span className ="customListedStyle">
                             {includeExclude?.includes ? parse(includeExclude?.includes) : ''}
                         </span>
                     </div>
                       
                     {/* <div className="w-14 border-b border-neutral-200 dark:border-neutral-700"></div> */}
-                    <div className="text-neutral-600 dark:text-neutral-300 mt-3">
+                    <div className="text-neutral-600 dark:text-neutral-300">
                         <span className ="customListedStyle">
                             {includeExclude?.excludes ? parse(includeExclude?.excludes) : ''}
                         </span>
                     </div>
-                     
+                      <h3 className="text-2xl font-semibold">General Rules</h3>
                     {/* <div className="w-14 border-b border-neutral-200 dark:border-neutral-700"></div> */}
-                    <div className="text-neutral-600 dark:text-neutral-300 mt-3">
+                    <div className="text-neutral-600 dark:text-neutral-300">
                         <span className ="customListedStyle">
                             {includeExclude?.generalrules ? parse(includeExclude?.generalrules) : ''}
                         </span>
@@ -319,13 +261,13 @@ const HoiTripsDetails = () => {
      
         const renderSection6 = () => {
 		return (
-			<div className="listingSection__wrap cstm-padding">
+			<div className="listingSection__wrap">
 				{/* HEADING */}
 				<h2 className="text-2xl font-semibold">Reviews (23 reviews)</h2>
-			
+				<div className="w-14 border-b border-neutral-200 dark:border-neutral-700"></div>
 
 				{/* Content */}
-				<div className="space-y-2 mt-3">
+				<div className="space-y-5">
 					<FiveStartIconForRate iconClass="w-6 h-6" className="space-x-0.5" />
 					<div className="relative">
 						<Input
@@ -344,7 +286,7 @@ const HoiTripsDetails = () => {
 				</div>
 
 				{/* comment */}
-				<div className="divide-y divide-neutral-100 dark:divide-neutral-800 mt-3">
+				<div className="divide-y divide-neutral-100 dark:divide-neutral-800">
 					<CommentListing className="py-8" />
 					<CommentListing className="py-8" />
 					<CommentListing className="py-8" />
@@ -359,10 +301,10 @@ const HoiTripsDetails = () => {
   const sideBar = ({sideBarHoiTrips} : any) =>{
       return(
           <>
-            <div className="listingSectionSidebar__wrap shadow-xl mt-[6rem] sm:mt-0 cstm-padding">
+            <div className="listingSectionSidebar__wrap shadow-xl mt-[6rem] sm:mt-0">
                     {/* PRICE */}
-                  <div className="flex justify-between">
-					          <span className="text-xl font-semibold">
+                    <div className="flex justify-between">
+                      <span className="text-xl font-semibold">
                        
                         ₹{sideBarHoiTrips?.price}
                         <span className="ml-1 text-base font-normal text-neutral-500 dark:text-neutral-400">
@@ -378,10 +320,9 @@ const HoiTripsDetails = () => {
                           setStartDate={setStartDate}
                           hoitripdates={sideBarHoiTrips?.hoitripdates}
                           pricePackage={sideBarHoiTrips?.price}
-                          className="z-[11] flex-1"
                           />
                         <div className="w-full border-b border-neutral-200 dark:border-neutral-700"></div>
-                        	<GuestsInput onTotalChange={setGuestTotal} className="flex-1"/>
+                        	<GuestsInput className="flex-1 relative z-neg-1"onTotalChange={setGuestTotal}/>
                           </div>
                           
                             <div className="grid grid-cols-1 gap-6 sm:grid-cols-1 mt-5">
@@ -487,7 +428,7 @@ const HoiTripsDetails = () => {
                                   Message (optional)
                                 </label>
                               </div>
-                             <div className="mt-3 flex justify-center">
+                             <div className="mt-10 flex justify-center">
                                 <ButtonPrimary type="submit">Confirm Booking</ButtonPrimary>
                                
                                   {/* <ToastAlert
@@ -618,7 +559,7 @@ const HoiTripsDetails = () => {
         {trip && renderSection6()}
     </div>
     <div className="mt-14 lg:mt-0 lg:w-2/5 xl:w-1/3">
-					<div className="relative top-0">{trip && sideBar({sideBarHoiTrips : trip})}</div>
+					<div className="sticky top-24">{trip && sideBar({sideBarHoiTrips : trip})}</div>
 				</div>
 </main>
 

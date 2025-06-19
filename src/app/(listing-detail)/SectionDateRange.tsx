@@ -68,18 +68,18 @@ const SectionDateRange: FC<SectionDateRangeProps> = ({ setRoomPrice, propertyDat
 
   const renderSectionCheckIndate = () => {
     return (
-      <div className="listingSection__wrap cstm-padding overflow-hidden">
+      <div className="listingSection__wrap overflow-hidden">
         {/* HEADING */}
         <div>
           <h2 className="text-2xl font-semibold">Availability</h2>
-          <span className="block mt-2 text-neutral-500 dark:text-neutral-400 mt-3">
+          <span className="block mt-2 text-neutral-500 dark:text-neutral-400">
             Prices may increase on weekends or holidays
           </span>
         </div>
-        
+        <div className="w-14 border-b border-neutral-200 dark:border-neutral-700"></div>
         {/* CONTENT */}
 
-        <div className="mt-3">
+        <div className="">
           {/* <DatePicker
             selected={startDate}
             onChange={onChangeDate}

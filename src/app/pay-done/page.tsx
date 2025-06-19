@@ -1,19 +1,11 @@
-'use client';
 import StartRating from '@/components/StartRating'
 import React, { FC } from 'react'
 import ButtonPrimary from '@/shared/ButtonPrimary'
 import Image from 'next/image'
-import { useSearchParams } from 'next/navigation'; 
+
 export interface PayPageProps {}
 
-export default function PayPage({ searchParams }: { searchParams: Record<string, string> }) {
-	const trx = searchParams.trx;
-	const first_name = searchParams.first_name;
-	const last_name = searchParams.last_name;
-	const start_date = searchParams.start_date;
-	const guest = searchParams.guest;
-	const package_price = searchParams.package_price;
-	const package_name = searchParams.package_name;
+const PayPage: FC<PayPageProps> = () => {
 	const renderContent = () => {
 		return (
 			<div className="flex w-full flex-col space-y-10 px-0 sm:rounded-2xl sm:p-6 xl:p-8">
@@ -40,10 +32,10 @@ export default function PayPage({ searchParams }: { searchParams: Record<string,
 						<div className="space-y-3 pt-5 sm:px-5 sm:pb-5">
 							<div>
 								<span className="line-clamp-1 text-sm text-neutral-500 dark:text-neutral-400">
-									
+									Hotel room in Tokyo, Jappan
 								</span>
 								<span className="mt-1 block text-base font-medium sm:text-lg">
-									{package_name}
+									The Lounge & Bar
 								</span>
 							</div>
 							<span className="block text-sm text-neutral-500 dark:text-neutral-400">
@@ -73,7 +65,7 @@ export default function PayPage({ searchParams }: { searchParams: Record<string,
 							<div className="flex flex-col">
 								<span className="text-sm text-neutral-400">Date</span>
 								<span className="mt-1.5 text-lg font-semibold">
-									{start_date}
+									Aug 12 - 16, 2021
 								</span>
 							</div>
 						</div>
@@ -95,7 +87,7 @@ export default function PayPage({ searchParams }: { searchParams: Record<string,
 
 							<div className="flex flex-col">
 								<span className="text-sm text-neutral-400">Guests</span>
-								<span className="mt-1.5 text-lg font-semibold">{guest}</span>
+								<span className="mt-1.5 text-lg font-semibold">3 Guests</span>
 							</div>
 						</div>
 					</div>
@@ -108,34 +100,27 @@ export default function PayPage({ searchParams }: { searchParams: Record<string,
 						<div className="flex text-neutral-600 dark:text-neutral-300">
 							<span className="flex-1">Booking code</span>
 							<span className="flex-1 font-medium text-neutral-900 dark:text-neutral-100">
-								{trx}
+								#222-333-111
 							</span>
 						</div>
-						<div className="flex text-neutral-600 dark:text-neutral-300">
-							<span className="flex-1">Name</span>
-							<span className="flex-1 font-medium text-neutral-900 dark:text-neutral-100">
-								{first_name}{last_name}
-							</span>
-						</div>
-						
 						<div className="flex text-neutral-600 dark:text-neutral-300">
 							<span className="flex-1">Date</span>
 							<span className="flex-1 font-medium text-neutral-900 dark:text-neutral-100">
-								{start_date}
+								12 Aug, 2021
 							</span>
 						</div>
 						<div className="flex text-neutral-600 dark:text-neutral-300">
 							<span className="flex-1">Total</span>
 							<span className="flex-1 font-medium text-neutral-900 dark:text-neutral-100">
-								{package_price}
+								$199
 							</span>
 						</div>
-						{/* <div className="flex justify-between text-neutral-600 dark:text-neutral-300">
+						<div className="flex justify-between text-neutral-600 dark:text-neutral-300">
 							<span className="flex-1">Payment method</span>
 							<span className="flex-1 font-medium text-neutral-900 dark:text-neutral-100">
 								Credit card
 							</span>
-						</div> */}
+						</div>
 					</div>
 				</div>
 				<div>
@@ -154,4 +139,4 @@ export default function PayPage({ searchParams }: { searchParams: Record<string,
 	)
 }
 
-
+export default PayPage

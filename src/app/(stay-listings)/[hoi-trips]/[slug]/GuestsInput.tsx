@@ -59,7 +59,7 @@ const GuestsInput: FC<GuestsInputProps> = ({ className = 'flex-1', onTotalChange
     guestChildrenInputValue + guestAdultsInputValue + guestInfantsInputValue;
 
     return (
-        <Popover className={`relative flex cstm-btn-padding ${className}`}>
+        <Popover className={`relative flex ${className}`}>
             {({ open }) => (
                 <>
                     <div

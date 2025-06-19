@@ -82,7 +82,7 @@ const StayDatesRangeInput: FC<StayDatesRangeInputProps> = ({
 							})
 							: ''}
 					</span>
-					<span className="mt-1 block text-sm font-light leading-none text-neutral-400">
+					<span className="mt-1 mb-1 block text-sm font-light leading-none text-neutral-400">
 						{'Check in - Check out'}
 					</span>
 				</div>
@@ -114,7 +114,7 @@ const StayDatesRangeInput: FC<StayDatesRangeInputProps> = ({
 						leaveTo="opacity-0 translate-y-1"
 					>
 						<PopoverPanel className="absolute left-auto right-0 top-full z-10 mt-3 w-screen max-w-sm px-4 sm:px-0 lg:max-w-3xl xl:-right-10">
-							<div className="overflow-hidden rounded-3xl bg-white p-8 shadow-lg ring-1 ring-black ring-opacity-5 dark:bg-neutral-800">
+							<div className="overflow-hidden rounded-3xl bg-white p-2 shadow-lg ring-1 ring-black ring-opacity-5 dark:bg-neutral-800 cstm-cal">
 								{/* <DatePicker
 									selected={startDate}
 									// onChange={onChangeDate}

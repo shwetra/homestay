@@ -87,9 +87,9 @@ const StayCard2: FC<StayCard2Props> = ({
 		return (
 			<div className={size === 'default' ? 'mt-3 space-y-3' : 'mt-2 space-y-2'}>
 				<div className="space-y-2">
-					<span className="text-sm text-neutral-500 dark:text-neutral-400">
+					{/* <span className="text-sm text-neutral-500 dark:text-neutral-400">
 						{properties[0]?.bedrooms} bedroom · {properties[0].beds} bed
-					</span>
+					</span> */}
 					<div className="flex items-center space-x-2">
 						{isAds && <Badge name="ADS" color="green" />}
 						<h2
@@ -242,9 +242,9 @@ const StayCard2: FC<StayCard2Props> = ({
 						className={size === 'default' ? 'mt-3 space-y-3' : 'mt-2 space-y-2'}
 					>
 						<div className="space-y-2">
-							<span className="text-sm text-neutral-500 dark:text-neutral-400">
+							{/* <span className="text-sm text-neutral-500 dark:text-neutral-400">
 								{item?.bedrooms} {item?.bedrooms > 1 ? 'bedrooms' : 'bedroom'} · {item?.beds} {item?.beds > 1 ? 'beds' : 'bed'}
-							</span>
+							</span> */}
 							<div className="flex items-center space-x-2">
 								{/* {isAds && <Badge name="ADS" color="green" />} */}
 								<h2
@@ -276,7 +276,7 @@ const StayCard2: FC<StayCard2Props> = ({
 										/>
 									</svg>
 								)}
-								<span className="">{item?.property_address?.city}, {item?.property_address?.state}</span>
+								<span className="">{item?.property_address?.display_address}</span>
 							</div>
 						</div>
 						<div className="w-14 border-b border-neutral-100 dark:border-neutral-800"></div>

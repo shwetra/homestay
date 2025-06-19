@@ -14,7 +14,7 @@ export interface GallerySliderProps {
     galleryImgs: any //(StaticImageData | string)[] 
     ratioClass?: string
     uniqueID: string
-    // href?: any //Route<string>
+    href?: any 
     imageClass?: string
     galleryClass?: string
     navigation?: boolean
@@ -27,7 +27,7 @@ export default function GallerySlider4({
     imageClass = '',
     uniqueID = 'uniqueID',
     galleryClass = 'rounded-xl',
-    // href = '/listing-stay-detail',
+    href = '/listing-stay-detail',
     navigation = true,
 }: any) {
     const [loaded, setLoaded] = useState(false)
@@ -87,11 +87,11 @@ export default function GallerySlider4({
             >
                 {/* Main image */}
                 <div className={`w-full overflow-hidden ${galleryClass}`}>
-                    {/* <Link
+                    <Link
                         href={href}
                         className={`relative flex items-center justify-center ${ratioClass}`}
-                    > */}
-                    <div className={`relative flex items-center justify-center ${ratioClass}`}>
+                    >
+                   
                         <AnimatePresence initial={false} custom={direction}>
                             <motion.div
                                 key={index}
@@ -112,8 +112,9 @@ export default function GallerySlider4({
                                 />
                             </motion.div>
                         </AnimatePresence>
-                    {/* </Link> */}
-                    </div>
+                    
+                    
+                    </Link>
                 </div>
 
                 {/* Buttons + bottom nav bar */}
@@ -146,13 +147,14 @@ export default function GallerySlider4({
                     <div className="absolute inset-x-0 bottom-0 h-10 rounded-b-lg bg-gradient-to-t from-neutral-900 opacity-50"></div>
                     <div className="absolute bottom-2 left-1/2 flex -translate-x-1/2 transform items-center justify-center space-x-1.5">
                         {images.map((_: any, i: any) => (
-                            <button
-                                className={`h-1.5 w-1.5 rounded-full ${
-                                    i === index ? 'bg-white' : 'bg-white/60'
-                                }`}
-                                onClick={() => changePhotoId(i)}
-                                key={i}
-                            />
+                            // <button
+                            //     className={`h-1.5 w-1.5 rounded-full ${
+                            //         i === index ? 'bg-white' : 'bg-white/60'
+                            //     }`}
+                            //     onClick={() => changePhotoId(i)}
+                            //     key={i}
+                            // />
+                            <></>
                         ))}
                     </div>
                 </>

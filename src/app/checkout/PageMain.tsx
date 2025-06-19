@@ -17,9 +17,6 @@ import NcModal from '@/shared/NcModal'
 
 import converSelectedDateToString from '@/utils/converSelectedDateToString'
 
-
-
-
 export interface CheckOutPagePageMainProps {
   className?: string
   startDate?: Date | null
@@ -51,7 +48,7 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
   guestChildrenInputValue = 0,
   guestInfantsInputValue = 0,
   currentroomPrice = 0,
-  numberOfRoomSelected = 0,
+  numberOfRoomSelected,
   daysToStay = 1,
   workationDiscount = 0,
   surgedPrice = 0,
@@ -72,14 +69,16 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
     guestAdults: number;
     guestChildren: number;
     guestInfants: number;
+    extraGuest: number;
   }>({
     guestAdults: guestAdultsInputValue,
     guestChildren: guestChildrenInputValue,
     guestInfants: guestInfantsInputValue,
+    extraGuest: extraGuest,
   });
   
 
-  const totleguests = guestAdultsInputValue + guestChildrenInputValue + guestInfantsInputValue
+  const totleguests = guestAdultsInputValue + guestChildrenInputValue + guestInfantsInputValue + extraGuest
 
   const roomsid = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('selectedRoom') || 'null') : null
  
@@ -177,7 +176,7 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
               <div className="flex flex-col">
                 <span className="text-sm text-neutral-400">Guests</span>
                 <span className="mt-1.5 text-lg font-semibold">
-                  {`${guests.guestAdults || 0} Adult, ${guests.guestChildren || 0} Children, ${guests.guestInfants || 0} Infant`}
+                  {`${guests.guestAdults || 0} Adult, ${guests.extraGuest || 0} Extra Guest, ${guests.guestChildren || 0} Children, ${guests.guestInfants || 0} Infant`}
                 </span>
               </div>
             </button>
@@ -185,6 +184,7 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
         />
       </div>
       <div className="flex flex-col space-y-4">
+      
         <div className="flex justify-between text-neutral-600 dark:text-neutral-300">
           <span>
             <div>
@@ -198,7 +198,8 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
             )}
           </span>
           <span>
-            <div>₹ {surgedPrice - extraGuest * (currentActiveRoom?.guest_fee || 0)}</div>
+            {/* <div>₹ {surgedPrice - extraGuest * (currentActiveRoom?.guest_fee || 0)}</div> */}
+            <div>₹ {(roomPrice * daysToStay).toFixed(2)}</div> 
             {workationDiscount > 0 && (
               <span className="text-xs line-through">₹ {(roomPrice * daysToStay).toFixed(2)}</span>
             )}
@@ -207,11 +208,17 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
         {extraGuest > 0 && (
           <div className="flex justify-between text-neutral-600 dark:text-neutral-300">
             <span>
-              Extra Guest ({extraGuest} x ₹{currentActiveRoom?.guest_fee})
+              Extra Guest ({extraGuest} x ₹{currentActiveRoom?.guest_fee} x {daysToStay}/Day)
             </span>
-            <span>₹ {extraGuest * (currentActiveRoom?.guest_fee || 0)}</span>
+            <span>₹ {(extraGuest * (currentActiveRoom?.guest_fee || 0))*daysToStay}</span>
           </div>
         )}
+        {guestChildrenInputValue > 0 &&
+								<div className="flex justify-between text-neutral-600 dark:text-neutral-300">
+										<span>Children ({guestChildrenInputValue} x ₹{(currentActiveRoom?.guest_fee)/2} x {daysToStay.toFixed(0)} <span className="text-xs">day</span>)</span>
+										<span>₹ {(guestChildrenInputValue * ((currentActiveRoom?.guest_fee)/2) * daysToStay) .toFixed(0)}</span>
+									</div>
+							}
         <div className="flex justify-between text-neutral-600 dark:text-neutral-300">
           <span>Convenience Fee ({convenienceFee}%)</span>
           <span>₹ {((convenienceFee / 100) * surgedPrice).toFixed(2)}</span>

@@ -83,9 +83,9 @@ const StayCard2Copy: FC<StayCard2Props> = ({
 		return (
 			<div className={size === 'default' ? 'mt-3 space-y-3' : 'mt-2 space-y-2'}>
 				<div className="space-y-2">
-					<span className="text-sm text-neutral-500 dark:text-neutral-400">
+					{/* <span className="text-sm text-neutral-500 dark:text-neutral-400">
 						{properties[0]?.bedrooms} bedroom · {properties[0].beds} bed
-					</span>
+					</span> */}
 					<div className="flex items-center space-x-2">
 						{isAds && <Badge name="ADS" color="green" />}
 						<h2
@@ -239,9 +239,9 @@ const StayCard2Copy: FC<StayCard2Props> = ({
 					className={size === 'default' ? 'mt-3 space-y-3' : 'mt-2 space-y-2'}
 				>
 					<div className="space-y-2">
-						<span className="text-sm text-neutral-500 dark:text-neutral-400">
+						{/* <span className="text-sm text-neutral-500 dark:text-neutral-400">
 							{data?.bedrooms} {data?.bedrooms > 1 ? 'bedrooms' : 'bedroom'} · {data?.beds} {data?.beds > 1 ? 'beds' : 'bed'}
-						</span>
+						</span> */}
 						<div className="flex items-center space-x-2">
 							{/* {isAds && <Badge name="ADS" color="green" />} */}
 							<h2
@@ -273,7 +273,7 @@ const StayCard2Copy: FC<StayCard2Props> = ({
 									/>
 								</svg>
 							)}
-							<span className="">{data?.property_address?.city}, {data?.property_address?.state}</span>
+							<span className="">{data?.property_address?.display_address}</span>
 						</div>
 					</div>
 					<div className="w-14 border-b border-neutral-100 dark:border-neutral-800"></div>

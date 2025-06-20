@@ -47,6 +47,7 @@ import GallerySlider3 from '@/components/GallerySlider3'
 import ModalSelectDate from '@/components/ModalSelectDate'
 import ModalReserveMobile from '../../(components)/ModalReserveMobile'
 import { setPriority } from 'node:os'
+import { after } from 'lodash'
 
 
 export interface ListingStayDetailPageProps { }
@@ -70,8 +71,11 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ }) => {
 		count: 1,
 		accommodates: 0,
 		guest_fee: 0,
+		guest_after: 0,
+		total_accommodates: 0,
 		price: 0
 	})
+
 	const [surgedPrice, setSurgedPrice] = useState<any>()
 	const [convenienceFee, setConvenienceFee] = useState<any>()
 	const [gst, setGst] = useState<any>()
@@ -89,6 +93,8 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ }) => {
 		const price = listingDetail?.rooms?.find((room: any) => room?.room_type?.name.toLowerCase() === currentActiveRoom?.toLowerCase())?.room_price
 		return price;
 	}
+
+
 
 	// const currentroomPrice = getRoomPrice(currentActiveRoom?.type || 'Classic')
   const currentroomPrice =
@@ -215,6 +221,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ }) => {
 				setListingDetail(data.data);
 				setPropertyDates(data?.data?.result?.property_dates || []);
 				const rooms = categorizeRooms(data?.data?.rooms)
+			
 				setCategorizeRooms(rooms)
 				setConvenienceFee(data?.data?.fixedfees[0]?.convenience)
 				setGst(data?.data?.fixedfees[0]?.gst)
@@ -266,9 +273,11 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ }) => {
 					bathrooms: room.bathrooms,
 					space_type: room?.space_type,
 					accommodates: room?.accommodates,
+					total_accommodates: room?.total_accommodates,
 					guest_fee: room?.room_pricing[0]?.guest_fee,
 					total_rooms: 1,
-					roomid: room.id
+					roomid: room.id,
+					guest_after: room?.room_pricing[0]?.guest_after,
 				}
 				// console.log(room?.space_type,"ddvvv")
 			} else {
@@ -279,30 +288,6 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ }) => {
 		return Object.values(categorized);
 	}
 
-
-	// const handleErrorMessageDisplay = (openModal: any) => {
-	// 	if (numberOfRoomSelected == 0) {
-	// 		setSelectRoomFirstWarning(true)
-	// 		setSelectGuestWarning(false)
-	// 		setGuestLimitExceed(false)
-	// 	}
-	// 	else if (guestAdultsInputValue == 0) {
-	// 		setSelectGuestWarning(true)
-	// 		setSelectRoomFirstWarning(false)
-	// 		setGuestLimitExceed(false)
-	// 	}
-	// 	else if ((guestAdultsInputValue + guestChildrenInputValue - extraGuest) > numberOfRoomSelected) {
-	// 		setSelectGuestWarning(false)
-	// 		setSelectRoomFirstWarning(false)
-	// 		setGuestLimitExceed(true)
-	// 	}
-	// 	else {
-	// 		setSelectGuestWarning(false)
-	// 		setSelectRoomFirstWarning(false)
-	// 		setGuestLimitExceed(false)
-	// 		openModal()
-	// 	}
-	// }
 useEffect(() => {
   const selectedRooms = currentActiveRoom?.rooms || [];
 
@@ -314,13 +299,25 @@ const handleErrorMessageDisplay = (openModal: any) => {
   const totalGuests = guestAdultsInputValue + guestChildrenInputValue + extraGuest;
   const selectedRooms = currentActiveRoom?.rooms || [];
 
-  const totalAccommodates = selectedRooms.reduce(
-    (acc: number, room: any) => acc + (room.accommodates * room.count),
-    0
-  );
+  let accommodates = 0;
+  let guestAfter = 0;
 
-  console.log("Room count:", numberOfRoomSelected); // Will now show correct value
-  console.log("Accommodates:", totalAccommodates);
+  // Calculate total accommodates and total guest_after
+  selectedRooms.forEach((room: any) => {
+    const count = Number(room.count) || 0;
+    const roomAccommodates = Number(room.accommodates) || 0;
+    const roomGuestAfter = Number(room?.guest_after) || 0;
+
+    accommodates += roomAccommodates * count;
+    guestAfter += roomGuestAfter * count;
+
+    console.log(`GuestAfter: ${roomGuestAfter}, Count: ${count}, Accommodates: ${roomAccommodates}`);
+  });
+
+  const totalAccommodates = accommodates + guestAfter;
+
+  console.log("Room count:", numberOfRoomSelected);
+  console.log("Total Accommodates (with guest_after):", totalAccommodates);
   console.log("Guest Total:", totalGuests);
 
   if (numberOfRoomSelected === 0 || selectedRooms.length === 0) {
@@ -331,17 +328,21 @@ const handleErrorMessageDisplay = (openModal: any) => {
     setSelectRoomFirstWarning?.(false);
     setSelectGuestWarning?.(true);
     setGuestLimitExceed?.(false);
-  } else if (totalGuests > totalAccommodates) {
+  } 
+  else if (totalGuests  > totalAccommodates )
+	{
     setSelectRoomFirstWarning?.(false);
     setSelectGuestWarning?.(false);
     setGuestLimitExceed?.(true);
-  } else {
+  } 
+  else {
     setSelectRoomFirstWarning?.(false);
     setSelectGuestWarning?.(false);
     setGuestLimitExceed?.(false);
     openModal();
   }
 };
+
 
 
 useEffect(() => {
@@ -1430,6 +1431,8 @@ useEffect(() => {
 															onChange={(e) => {
 																const selectedValue = parseInt(e.target.value);
 																const roomKey = item?.space_type;
+																
+																
 
 																let updatedRooms = [...selectedRooms].filter(r => r.space_type !== roomKey);
 
@@ -1441,12 +1444,15 @@ useEffect(() => {
 																	guest_fee: item?.guest_fee,
 																	room_price: item?.room_price,
 																	room_id: item?.id,
-																	space_type: item?.space_type
+																	space_type: item?.space_type,
+																	guest_after: item?.guest_after,
+																	total_accommodates: item?.total_accommodates,
 																};
 																updatedRooms.push(newRoom);
 																}
 
 																setSelectedRooms(updatedRooms);
+																console.log(updatedRooms, "updatedRooms");
 
 																const total = updatedRooms.reduce((acc, room) => acc + room.room_price * room.count, 0);
 																setRoomPrice(total);

@@ -1060,8 +1060,8 @@ useEffect(() => {
 							<div key={index} className="flex justify-between">
 								<span>
 								₹ {room.room_price}
-								<span className="text-xs">/night</span> {room.type} (
-								{room.count} <span className="text-xs">room</span> x{" "}
+								<span className="text-xs">/night</span> {room.space_type !== 8 ? room.type : ""} (
+								{room.count} <span className="text-xs">{room.space_type === 8 ? "Person" : "room"}</span> x{" "}
 								{daysToStay.toFixed(0)} <span className="text-xs">day</span>)
 								</span>
 								<span>₹ {(room.room_price * room.count * daysToStay).toFixed(0)}</span>

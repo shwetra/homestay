@@ -68,6 +68,9 @@ const totalCapacity = currentActiveRoom?.rooms?.reduce(
 // shared capacity for children + extra guests
 const guestAfterCapacity = totalCapacity - totalLengthAccommodates;
 
+const hasSpaceType8 = currentActiveRoom?.rooms?.some(
+  (room: any) => Number(room.space_type) === 8
+) || false;
 useEffect(() => {
   if (totalGuests > totalLengthAccommodates + guestAfterCapacity) {
     setGuestLimitExceed?.(true);
@@ -148,15 +151,17 @@ console.log( totalLengthAccommodates,'Guest Page totalAccommodates')
 								label="Adults"
 								/>
 
+								{!hasSpaceType8  && (
 								<NcInputNumber
-								className="mt-6 w-full"
-								defaultValue={extraGuest}
-								onChange={(value) => setExtraGuest?.(value)}
-								min={0}
-								max={guestAfterCapacity - guestChildrenInputValue < 0 ? 0 : guestAfterCapacity - guestChildrenInputValue}
-								label="Extra Guests"
-								desc="Ages 13 or above"
+									className="mt-6 w-full"
+									defaultValue={extraGuest}
+									onChange={(value) => setExtraGuest?.(value)}
+									min={0}
+									max={guestAfterCapacity - guestChildrenInputValue < 0 ? 0 : guestAfterCapacity - guestChildrenInputValue}
+									label="Extra Guests"
+									desc="Ages 13 or above"
 								/>
+								)}
 
 								<NcInputNumber
 								className="mt-6 w-full"

@@ -24,7 +24,7 @@ export interface SectionGridFeaturePlacesProps {
 const SectionGridFeaturePlaces: FC<SectionGridFeaturePlacesProps> = ({
 	stayListings = DEMO_DATA,
 	gridClass = '',
-	heading = 'Featured places to stay',
+	heading = 'Featured Places To Stay',
 	subHeading = '',
 	headingIsCenter,
 	// tabs = ['New York', 'Tokyo', 'Paris', 'London'],

@@ -67,7 +67,11 @@ const totalCapacity = currentActiveRoom?.rooms?.reduce(
 
 // shared capacity for children + extra guests
 const guestAfterCapacity = totalCapacity - totalLengthAccommodates;
-
+// Infants Maximum Limit 2
+const infantsMaximumLimit = currentActiveRoom?.rooms?.reduce(
+  (acc: number, room: any) => acc + (Number(2) * Number(room.count || 0)),
+  0
+) || 0;
 const hasSpaceType8 = currentActiveRoom?.rooms?.some(
   (room: any) => Number(room.space_type) === 8
 ) || false;
@@ -88,11 +92,38 @@ useEffect(() => {
 
 
 console.log( totalLengthAccommodates,'Guest Page totalAccommodates')
+console.log(guestAfterCapacity,'guestAfterCapacity')
 	useEffect(() => {
 		if (!guestAdultsInputValue || guestAdultsInputValue === 0) {
 			setGuestAdultsInputValue?.(1)
 		}
 	}, [guestAdultsInputValue, setGuestAdultsInputValue])
+	useEffect(() => {
+  // Cap both values within the guestAfterCapacity
+  if (extraGuest > guestAfterCapacity) {
+    setExtraGuest?.(guestAfterCapacity);
+  }
+
+  if (guestChildrenInputValue > guestAfterCapacity) {
+    setGuestChildrenInputValue?.(guestAfterCapacity);
+  }
+
+  // If either reaches full guestAfterCapacity, force the other to 0
+  if (extraGuest + guestChildrenInputValue > guestAfterCapacity) {
+    const overflow = extraGuest + guestChildrenInputValue - guestAfterCapacity;
+
+    if (extraGuest >= guestAfterCapacity) {
+      setGuestChildrenInputValue?.(0);
+    } else if (guestChildrenInputValue >= guestAfterCapacity) {
+      setExtraGuest?.(0);
+    } else if (extraGuest > guestChildrenInputValue) {
+      setExtraGuest?.(extraGuest - overflow);
+    } else {
+      setGuestChildrenInputValue?.(guestChildrenInputValue - overflow);
+    }
+  }
+}, [extraGuest, guestChildrenInputValue, guestAfterCapacity]);
+
 
 	return (
 		<Popover className={`relative flex ${className}`}>
@@ -151,7 +182,7 @@ console.log( totalLengthAccommodates,'Guest Page totalAccommodates')
 								label="Adults"
 								/>
 
-								{!hasSpaceType8  && (
+								{/* {!hasSpaceType8  && (
 								<NcInputNumber
 									className="mt-6 w-full"
 									defaultValue={extraGuest}
@@ -171,9 +202,41 @@ console.log( totalLengthAccommodates,'Guest Page totalAccommodates')
 								max={guestAfterCapacity - extraGuest < 0 ? 0 : guestAfterCapacity - extraGuest}
 								label="Children"
 								desc="Ages 7–12"
-								/>
+								/> */}
 
-							<NcInputNumber className="mt-6 w-full" defaultValue={guestInfantsInputValue} onChange={(value) => handleChangeData(value, 'guestInfants')} label="Infants" desc="Ages 0–6" /> 
+								{!hasSpaceType8 && (
+									<NcInputNumber
+										className="mt-6 w-full"
+										defaultValue={extraGuest}
+										onChange={(value) => setExtraGuest?.(value)}
+										min={0}
+										max={
+										guestChildrenInputValue >= guestAfterCapacity
+											? 0
+											: guestAfterCapacity - guestChildrenInputValue
+										}
+										label="Extra Guests"
+										desc="Ages 13 or above"
+									/>
+									)}
+
+									<NcInputNumber
+									className="mt-6 w-full"
+									defaultValue={guestChildrenInputValue}
+									onChange={(value) => handleChangeData(value, 'guestChildren')}
+									min={0}
+									max={
+										extraGuest >= guestAfterCapacity
+										? 0
+										: guestAfterCapacity - extraGuest
+									}
+									label="Children"
+									desc="Ages 7–12"
+									/>
+
+
+
+							<NcInputNumber className="mt-6 w-full" defaultValue={guestInfantsInputValue} onChange={(value) => handleChangeData(value, 'guestInfants')} label="Infants" desc="Ages 0–6"  min={0} max={infantsMaximumLimit}/> 
 						</PopoverPanel>
 					</Transition>
 				</>

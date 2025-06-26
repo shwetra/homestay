@@ -287,7 +287,7 @@ const StayCard2: FC<StayCard2Props> = ({
 								{` `}
 								{size === 'default' && (
 									<span className="text-sm font-normal text-neutral-500 dark:text-neutral-400">
-										/day
+										/{item?.property_type === 29? "Week": "Day"}
 									</span>
 								)}
 							</span>

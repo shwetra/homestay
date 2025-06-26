@@ -6,7 +6,7 @@ import Nav from "@/shared/Nav";
 import NavItem from "@/shared/NavItem";
 import ButtonSecondary from "@/shared/ButtonSecondary";
 import { ArrowRightIcon } from "@heroicons/react/24/outline";
-
+import { useRouter } from 'next/navigation'; 
 export interface HeaderFilterProps {
   tabActive: string;
   tabs: string[];
@@ -24,6 +24,9 @@ const HeaderFilter: FC<HeaderFilterProps> = ({
   setCurrentActiveTab = "",
   onClickTab = () => {},
 }) => {
+  const router = useRouter();
+
+
   const [tabActiveState, setTabActiveState] = useState(tabActive);
 
   useEffect(() => {
@@ -35,6 +38,10 @@ const HeaderFilter: FC<HeaderFilterProps> = ({
     setTabActiveState(item);
     setCurrentActiveTab(item)
   };
+const handleViewAll = () => {
+  localStorage.setItem("selectedPropertyType", tabActiveState);
+  router.push('/listing-stay'); // clean URL, no query param
+};
 
   return (
     <div className="flex flex-col mb-8 relative">
@@ -55,7 +62,7 @@ const HeaderFilter: FC<HeaderFilterProps> = ({
           ))}
         </Nav>
         <span className="hidden sm:block flex-shrink-0">
-          <ButtonSecondary href="/listing-stay" className="!leading-none">
+          <ButtonSecondary onClick={handleViewAll} className="!leading-none">
             <div className="flex items-center justify-center">
               <span>View all</span>
               <ArrowRightIcon className="w-5 h-5 ml-3" />

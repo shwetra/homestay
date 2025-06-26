@@ -22,7 +22,7 @@ import {  ArrowRightIcon, ArrowLeftIcon ,CalendarIcon,
 import StayDatesRangeInput from './StayDateRangeInput';
 import Label from '@/components/Label';
 import ButtonPrimary from '@/shared/ButtonPrimary';
-
+import CategoryImageSlider from '@/components/CategoryImageSlider';
 interface HoitripPhoto {
   id: number;
   photo: string;
@@ -543,7 +543,7 @@ const HoiTripsDetails = () => {
           </button>
         </div>
       </header>
-
+      
       {isModalOpen && trip && (
   <div className="fixed inset-0 bg-black bg-opacity-80 z-50 flex items-center justify-center p-4">
     <div className="relative w-full max-w-6xl mx-auto bg-white rounded-lg overflow-hidden p-6">
@@ -621,7 +621,8 @@ const HoiTripsDetails = () => {
 					<div className="relative top-0">{trip && sideBar({sideBarHoiTrips : trip})}</div>
 				</div>
 </main>
-
+     {/* <h1 className="text-2xl font-bold mb-4">Image Gallery by Category</h1>
+      <CategoryImageSlider /> */}
     </React.Fragment>
   );
 };

@@ -1,6 +1,6 @@
 'use client'
 
-import { Fragment, useEffect, useState } from 'react'
+import React, { Fragment, useEffect, useState, FC, useRef} from 'react'
 import {
 	Dialog,
 	DialogBackdrop,
@@ -12,6 +12,7 @@ import {
 	Transition,
 } from '@headlessui/react'
 import NcInputNumber from '@/components/NcInputNumber'
+import { MapPinIcon } from "@heroicons/react/24/outline";
 import ButtonPrimary from '@/shared/ButtonPrimary'
 import ButtonThird from '@/shared/ButtonThird'
 import ButtonClose from '@/shared/ButtonClose'
@@ -23,6 +24,7 @@ import axios from 'axios'
 import { Combobox, ComboboxInput, ComboboxOption, ComboboxOptions } from '@headlessui/react'
 import GooglePlaceComponent from './GooglePlaceComponent'
 import debounce from 'lodash/debounce';
+import { filter } from 'lodash'
 
 // DEMO DATA
 const typeOfPaces = [
@@ -88,8 +90,11 @@ const locations = [
 	{ id: 4, name: 'Ladakh' },
 	{ id: 5, name: 'Nanital' },
   ]
-
-const TabFilters = () => {
+interface TabFiltersProps {
+  filters: any;
+  setFilters: (filters: any) => void;
+}
+const TabFilters: FC<TabFiltersProps> = ({ filters, setFilters }) => {
 	const [isOpenMoreFilter, setisOpenMoreFilter] = useState<any>(false)
 	const [isOpenMoreFilterMobile, setisOpenMoreFilterMobile] = useState<any>(false)
 	const [rangePrices, setRangePrices] = useState<any>([0, 1000])
@@ -105,14 +110,24 @@ const TabFilters = () => {
 			return location.name.toLowerCase().includes(query.toLowerCase())
 		  })
 
-		const [location, setLocation] = useState('Delhi');
+		  type SuggestionItem = {
+			name: string;
+			slug: string;
+			};
+		const [selectedLocationName, setSelectedLocationName] = useState("");
+		const [searchTerm, setSearchTerm] = useState("");
+		const debounceTimer = useRef<NodeJS.Timeout | null>(null);
+		const [suggestions, setSuggestions] = useState<{ state: string; name: string }[]>([]);
+        const [showSuggestions, setShowSuggestions] = useState(false);
+		const [location, setLocation] = useState<string | null>(null);
+		const [propertyName, setPropertyName] = useState<string | null>(null);
 		const [checkin, setCheckin] = useState('');
 		const [checkout, setCheckout] = useState('');
 		const [guest, setGuest] = useState(0);
 		const [bedrooms, setBedrooms] = useState(0);
-		const [beds, setBeds] = useState(0);
-		const [bathrooms, setBathrooms] = useState(0);
-		const [propertyType, setPropertyType] = useState('');
+		const [beds, setBeds] = useState<string | null>(null);
+		const [bathrooms, setBathrooms] = useState(1);
+		const [propertyType, setPropertyType] = useState<string | null>(null);
 		const [spaceType, setSpaceType] = useState('');
 		const [selectedAmenities, setSelectedAmenities] = useState('');
 		const [bookType, setBookType] = useState('');
@@ -122,6 +137,14 @@ const TabFilters = () => {
 		const [currencyCode, setCurrencyCode] = useState('INR');
 		const [items, setItems] = useState(0);
 		const [page, setPage] = useState(1);
+		const [tempFilters, setTempFilters] = useState({
+		
+			location: filters.location,
+			type_items: filters.type_items,
+  			beds: filters.beds,
+			min_price: rangePrices[0].toString(),
+			max_price: rangePrices[1].toString(),
+			});
 
 	// fetch data for filter 
 	const fetchDataForFilter = async () => {
@@ -133,6 +156,7 @@ const TabFilters = () => {
 		  });
 		  if (data.status === 'success') {
 			setDataForFilter(data.data);
+			//setSuggestions(Object.keys(data.data.state || {}));
 			setRangePrices([data.data.min_price, data.data.max_price])
 		  }
 		} catch (error) {
@@ -163,10 +187,78 @@ const TabFilters = () => {
 		}
 	} 
 
-	const handleBedsChange = (value:number) => {
-		setBeds(value);
-	  };
-	  
+
+	//Search Place UseEffect
+	useEffect(() => {
+  if (debounceTimer.current) clearTimeout(debounceTimer.current);
+
+  if (searchTerm.trim()) {
+    debounceTimer.current = setTimeout(async () => {
+      try {
+        const { data } = await axios.get(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/properties/search?location=${searchTerm}`,
+          {
+            headers: {
+              "x-api-key": process.env.NEXT_PUBLIC_X_API_KEY,
+            },
+          }
+        );
+
+        const results = data?.data?.data || [];
+
+        const filtered = results.filter((place: any) =>
+          place?.name?.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+
+        setSuggestions(filtered);
+        setShowSuggestions(true);
+      } catch (err) {
+        console.error("Error fetching location suggestions", err);
+        setSuggestions([]);
+        setShowSuggestions(false);
+      }
+    }, 300);
+  } else {
+    setSuggestions([]);
+    setShowSuggestions(false);
+  }
+}, [searchTerm]);
+//Search Place UseEffectEnd 
+
+const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const value = e.target.value;
+  //setSearchTerm(value);
+  setShowSuggestions(true);
+};
+
+const handleSuggestionClick = (value: string) => {
+  //setSearchTerm(value);
+  setPropertyName(value); // sets `name`
+  setLocation(value);     // sets `state`
+  setShowSuggestions(false);
+};
+
+useEffect(() => {
+  setTempFilters({
+    location: location ?? "",
+    type_items: filters.type_items ?? "",
+    beds: filters.beds?.toString() ?? "",
+   	min_price: rangePrices[0].toString(),
+	max_price: rangePrices[1].toString(),
+  });
+}, [filters, rangePrices]);
+
+console.log(tempFilters,"tempFilters")
+
+	// const handleBedsChange = (value:number) => {
+	// 	setBeds(value.toString());
+	//   };
+	const handleBedsChange = (value: number) => {
+  setTempFilters((prev) => ({
+    ...prev,
+    beds: value.toString(),
+  }));
+};
 	  const handleBedroomsChange = (value:number) => {
 		setBedrooms(value);
 	  };
@@ -186,7 +278,16 @@ const TabFilters = () => {
 		setSelectedAmenities(prev => prev ? `${prev},${id}` : `${id}`);
 		}
 	};
-
+const handlePropertyTypeChange = (value: string) => {
+  setPropertyType(value); // for UI radio
+  setTempFilters((prev) => ({ ...prev, type_items: value }));
+};
+useEffect(() => {
+  const savedType = typeof window !== 'undefined' ? localStorage.getItem("selectedPropertyType") : null;
+  if (savedType) {
+    setPropertyType(savedType); 
+  }
+}, []);
 	const debouncedSearchProperties = debounce(searchProperties, 500);
 
 	useEffect(()=>{
@@ -233,7 +334,7 @@ const TabFilters = () => {
 	const renderTabsTypeOfPlace = (data:any) => {
 
 		const list = Object?.entries(data?.property_type || {})
-
+		 let selectedRadioValue = filters.type_items;
 		return (
 			<Popover className="relative">
 				{({ open, close }) => (
@@ -243,7 +344,7 @@ const TabFilters = () => {
 								open ? '!border-primary-500' : ''
 							}`}
 						>
-							<span>Type of property</span>
+							<span>{filters.type_items || 'Type of property'}</span>
 							<ChevronDownIcon className="ms-1 h-4 w-4" />
 						</PopoverButton>
 						<Transition
@@ -265,18 +366,28 @@ const TabFilters = () => {
 													label={value}
 													// subLabel={item.description}
 												/> */}
-												<input onChange={(e)=>setPropertyType(e.target.value)} value={value} type="radio" name="property-type" id={`${key}-${value}`} className='cursor-pointer' />
+												<input onChange={(e) => {selectedRadioValue = e.target.value;}} value={value} type="radio" name="property-type" id={`${key}-${value}`} className='cursor-pointer'   checked={filters?.type_items === value}/>
 												<label className='ms-3 cursor-pointer' htmlFor={`${key}-${value}`}>{value}</label>
 												
 											</div>
 										))}
 									</div>
 									<div className="flex items-center justify-between bg-neutral-50 p-5 dark:border-t dark:border-neutral-800 dark:bg-neutral-900">
-										<ButtonThird onClick={close} sizeClass="px-4 py-2 sm:px-5">
+										<ButtonThird   onClick={() => {
+															setFilters((prev:any) => ({ ...prev, type_items: null }));
+															localStorage.removeItem('selectedPropertyType');
+															close();
+														}} sizeClass="px-4 py-2 sm:px-5">
 											Clear
 										</ButtonThird>
 										<ButtonPrimary
-											onClick={close}
+											  onClick={() => {
+													setFilters((prev:any) => ({
+													...prev,
+													type_items: selectedRadioValue,
+													}));
+													close();
+												}}
 											sizeClass="px-4 py-2 sm:px-5"
 										>
 											Apply
@@ -310,65 +421,128 @@ const TabFilters = () => {
 	}
 
 	const renderSearchLocation = () => {
-
 		return (
-			<Popover className="relative">
-				{({ open, close }) => (
-					<>
-						<PopoverButton
-							className={`flex items-center justify-center rounded-full border border-neutral-300 px-4 py-2 text-sm hover:border-neutral-400 focus:outline-none dark:border-neutral-700 dark:hover:border-neutral-600 ${
-								open ? '!border-primary-500' : ''
-							}`}
-						>
-							<span>Search Location</span>
-							<ChevronDownIcon className="ms-1 h-4 w-4" />
-						</PopoverButton>
-						<Transition
-							as={Fragment}
-							enter="transition ease-out duration-200"
-							enterFrom="opacity-0 translate-y-1"
-							enterTo="opacity-100 translate-y-0"
-							leave="transition ease-in duration-150"
-							leaveFrom="opacity-100 translate-y-0"
-							leaveTo="opacity-0 translate-y-1"
-						>
-							<PopoverPanel className="absolute left-0 z-10 mt-3 w-screen max-w-sm px-4 sm:px-0 lg:max-w-sm">
-								<div className="overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-xl dark:border-neutral-700 dark:bg-neutral-900">
-									<div className='flex flex-col items-center justify-center my-5'>
-									<Combobox value={selectedLocation} onChange={setSelectedLocation} onClose={() => setQuery('')}>
-										<ComboboxInput
-											aria-label="Assignee"
-											// displayValue={(location) => location?.name }
-											onChange={(event) => setQuery(event.target.value)}
-											className="w-[90%] rounded-lg border border-gray-300"
-										/>
-										<ComboboxOptions anchor="bottom" className="z-[99] w-[22rem] rounded-lg p-2 border empty:invisible bg-white">
-											{filteredLocation.map((location) => (
-											<ComboboxOption key={location.id} value={location} className="data-[focus]:bg-blue-100 bg-white p-2 rounded-md">
-												{location.name}
-											</ComboboxOption>
-											))}
-										</ComboboxOptions>
-									</Combobox>
-									</div>
-									<div className="flex items-center justify-between bg-neutral-50 p-5 dark:border-t dark:border-neutral-800 dark:bg-neutral-900">
-										<ButtonThird onClick={close} sizeClass="px-4 py-2 sm:px-5">
-											Clear
-										</ButtonThird>
-										<ButtonPrimary
-											onClick={close}
-											sizeClass="px-4 py-2 sm:px-5"
-										>
-											Apply
-										</ButtonPrimary>
-									</div>
-								</div>
-							</PopoverPanel>
-						</Transition>
-					</>
-				)}
-			</Popover>
-		)
+    <div className="relative">
+      <input
+        type="text"
+        placeholder="Location"
+        className="flex items-center justify-center rounded-full border border-neutral-300 px-4 py-2 text-sm w-[240px] focus:border-primary-500 focus:outline-none"
+        value={searchTerm || tempFilters?.location}
+       	onChange={(e) => {setSearchTerm(e.target.value); setSelectedLocationName("");}}
+        onFocus={() => setShowSuggestions(true)}
+      />
+      {searchTerm && (
+        <button
+          onClick={() => {
+            setSearchTerm("");
+			 setSelectedLocationName("");
+            setLocation(null);
+            setSuggestions([]);
+            setShowSuggestions(false);
+          }}
+          className="absolute top-2 right-4 text-gray-500 text-sm"
+        >
+          <svg
+        xmlns="http://www.w3.org/2000/svg"
+        className="h-4 w-4"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        strokeWidth={2}
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M6 18L18 6M6 6l12 12"
+        />
+      </svg>
+        </button>
+      )}
+		{showSuggestions && suggestions.length > 0 && (
+		<ul className="absolute z-10 mt-2 w-full rounded-md bg-white shadow-lg max-h-60 overflow-auto">
+			{suggestions.map((item, index) => (
+			<li
+				key={index}
+				onClick={() => {
+				const selected = item.name;
+				setSearchTerm(item.name);
+				setSelectedLocationName(item.name);
+				setLocation((item as any).slug); 
+				setFilters((prev:any) => ({
+					...prev,
+					location: (item as any).slug,
+				}));
+				setShowSuggestions(false);
+				}}
+				className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex gap-2 items-center"
+			>
+				<span><MapPinIcon className="h-4 w-4 sm:h-6 sm:w-6 text-neutral-400" /></span>
+					<span className="text-neutral-700 dark:text-neutral-200">{item.name}</span>
+			</li>
+			))}
+		</ul>
+		)}
+      
+    </div>
+  );
+		// return (
+		// 	<Popover className="relative">
+		// 		{({ open, close }) => (
+		// 			<>
+		// 				<PopoverButton
+		// 					className={`flex items-center justify-center rounded-full border border-neutral-300 px-4 py-2 text-sm hover:border-neutral-400 focus:outline-none dark:border-neutral-700 dark:hover:border-neutral-600 ${
+		// 						open ? '!border-primary-500' : ''
+		// 					}`}
+		// 				>
+		// 					<span>Search Location</span>
+		// 					<ChevronDownIcon className="ms-1 h-4 w-4" />
+		// 				</PopoverButton>
+		// 				<Transition
+		// 					as={Fragment}
+		// 					enter="transition ease-out duration-200"
+		// 					enterFrom="opacity-0 translate-y-1"
+		// 					enterTo="opacity-100 translate-y-0"
+		// 					leave="transition ease-in duration-150"
+		// 					leaveFrom="opacity-100 translate-y-0"
+		// 					leaveTo="opacity-0 translate-y-1"
+		// 				>
+		// 					<PopoverPanel className="absolute left-0 z-10 mt-3 w-screen max-w-sm px-4 sm:px-0 lg:max-w-sm">
+		// 						<div className="overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-xl dark:border-neutral-700 dark:bg-neutral-900">
+		// 							<div className='flex flex-col items-center justify-center my-5'>
+		// 							<Combobox value={selectedLocation} onChange={setSelectedLocation} onClose={() => setQuery('')}>
+		// 								<ComboboxInput
+		// 									aria-label="Assignee"
+		// 									// displayValue={(location) => location?.name }
+		// 									onChange={(event) => setQuery(event.target.value)}
+		// 									className="w-[90%] rounded-lg border border-gray-300"
+		// 								/>
+		// 								<ComboboxOptions anchor="bottom" className="z-[99] w-[22rem] rounded-lg p-2 border empty:invisible bg-white">
+		// 									{filteredLocation.map((location) => (
+		// 									<ComboboxOption key={location.id} value={location} className="data-[focus]:bg-blue-100 bg-white p-2 rounded-md">
+		// 										{location.name}
+		// 									</ComboboxOption>
+		// 									))}
+		// 								</ComboboxOptions>
+		// 							</Combobox>
+		// 							</div>
+		// 							<div className="flex items-center justify-between bg-neutral-50 p-5 dark:border-t dark:border-neutral-800 dark:bg-neutral-900">
+		// 								<ButtonThird onClick={close} sizeClass="px-4 py-2 sm:px-5">
+		// 									Clear
+		// 								</ButtonThird>
+		// 								<ButtonPrimary
+		// 									onClick={close}
+		// 									sizeClass="px-4 py-2 sm:px-5"
+		// 								>
+		// 									Apply
+		// 								</ButtonPrimary>
+		// 							</div>
+		// 						</div>
+		// 					</PopoverPanel>
+		// 				</Transition>
+		// 			</>
+		// 		)}
+		// 	</Popover>
+		// )
 	}
 
 	const renderTabsRoomAndBeds = (dataForFilter:any) => {
@@ -381,7 +555,7 @@ const TabFilters = () => {
 								open ? '!border-primary-500' : ''
 							}`}
 						>
-							<span>Rooms of Beds</span>
+							<span>{filters?.beds ? `Rooms of Beds (${filters.beds})` : 'Rooms of Beds'}	</span>
 							<ChevronDownIcon className="ms-1 h-4 w-4" />
 						</PopoverButton>
 						<Transition
@@ -393,19 +567,36 @@ const TabFilters = () => {
 							leaveFrom="opacity-100 translate-y-0"
 							leaveTo="opacity-0 translate-y-1"
 						>
-							<PopoverPanel className="absolute left-0 z-10 mt-3 w-screen max-w-sm px-4 sm:px-0">
+							<PopoverPanel className="absolute right-0 z-10 mt-3 w-screen max-w-sm px-4 sm:px-0">
 								<div className="overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-xl dark:border-neutral-700 dark:bg-neutral-900">
 									<div className="relative flex flex-col space-y-5 px-5 py-6">
-										<NcInputNumber label="Beds" onChange={handleBedsChange} defaultValue={dataForFilter?.beds || 0} max={10} />
-										<NcInputNumber label="Bedrooms" onChange={handleBedroomsChange} defaultValue={dataForFilter?.bedrooms || 0} max={10} />
-										<NcInputNumber label="Bathrooms" onChange={handleBathroomsChange} defaultValue={dataForFilter?.bathrooms || 0} max={10} />
+										<NcInputNumber label="Beds" onChange={handleBedsChange} defaultValue={Number(tempFilters?.beds) || 1} max={10} />
+										{/* <NcInputNumber label="Bedrooms" onChange={handleBedroomsChange} defaultValue={dataForFilter?.bedrooms || 0} max={10} />
+										<NcInputNumber label="Bathrooms" onChange={handleBathroomsChange} defaultValue={dataForFilter?.bathrooms || 0} max={10} /> */}
 									</div>
 									<div className="flex items-center justify-between bg-neutral-50 p-5 dark:border-t dark:border-neutral-800 dark:bg-neutral-900">
-										<ButtonThird onClick={close} sizeClass="px-4 py-2 sm:px-5">
+										<ButtonThird 	 
+												 onClick={() => {
+												setTempFilters((prev: any) => ({
+												...prev,
+												beds: "0", // reset beds only
+												}));
+												setFilters((prev: any) => ({
+												...prev,
+												beds: null,
+												}));
+												close();
+											}} sizeClass="px-4 py-2 sm:px-5">
 											Clear
 										</ButtonThird>
 										<ButtonPrimary
-											onClick={close}
+												    onClick={() => {
+													setFilters((prev: any) => ({
+													...prev,
+													beds: tempFilters.beds, // only update beds
+													}));
+													close();
+												}}
 											sizeClass="px-4 py-2 sm:px-5"
 										>
 											Apply
@@ -453,7 +644,7 @@ const TabFilters = () => {
 												range
 												className="text-red-400"
 												min={1}
-												max={2000}
+												max={10000}
 												// min={dataForFilter?.min_price || 1}
 												// max={dataForFilter?.max_price || 1000}
 												defaultValue={[rangePrices[0], rangePrices[1]]}
@@ -516,7 +707,10 @@ const TabFilters = () => {
 											Clear
 										</ButtonThird>
 										<ButtonPrimary
-											onClick={close}
+											onClick={() => {
+												setFilters(tempFilters); 
+												close(); 
+											}}
 											sizeClass="px-4 py-2 sm:px-5"
 										>
 											Apply
@@ -873,11 +1067,11 @@ const TabFilters = () => {
 	}
 
 	return (
-		<div className="flex lg:space-x-4 relative">
-			<div className="hidden space-x-4 lg:flex justify-start flex-wrap gap-3">
+		<div className="flex lg:space-x-1 relative">
+			<div className="hidden space-x-1 lg:flex justify-start flex-wrap gap-1">
 				{
-					// renderSearchLocation()
-					<GooglePlaceComponent setLocation={setLocation} />
+					 renderSearchLocation()
+					//<GooglePlaceComponent setLocation={setLocation} />
 				}
 				{renderCheckInDate()}
 				{renderCheckOutDate()}

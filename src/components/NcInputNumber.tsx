@@ -36,7 +36,8 @@ const NcInputNumber: FC<NcInputNumberProps> = ({
 		onChange && onChange(value - 1)
 	}
 	const handleClickIncrement = () => {
-		if (max && max <= value) return
+		//if (max && max <= value) return
+		if (typeof max === 'number' && value >= max) return
 		setValue((state) => {
 			return state + 1
 		})
@@ -80,7 +81,8 @@ const NcInputNumber: FC<NcInputNumberProps> = ({
 					className="flex h-8 w-8 items-center justify-center rounded-full border border-neutral-400 bg-white hover:border-neutral-700 focus:outline-none disabled:cursor-default disabled:opacity-50 disabled:hover:border-neutral-400 dark:border-neutral-500 dark:bg-neutral-900 dark:disabled:hover:border-neutral-500"
 					type="button"
 					onClick={handleClickIncrement}
-					disabled={max ? max <= value : false}
+					// disabled={max ? max <= value : false}
+					disabled={typeof max === 'number' && value >= max}
 				>
 					<PlusIcon className="h-4 w-4" />
 				</button>

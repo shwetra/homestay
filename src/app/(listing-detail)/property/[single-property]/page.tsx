@@ -12,6 +12,7 @@ import {
 	MapPinIcon,
 	Squares2X2Icon,
 	UsersIcon,
+	XMarkIcon,
 } from '@heroicons/react/24/outline'
 import CommentListing from '@/components/CommentListing'
 import FiveStartIconForRate from '@/components/FiveStartIconForRate'
@@ -48,6 +49,7 @@ import ModalSelectDate from '@/components/ModalSelectDate'
 import ModalReserveMobile from '../../(components)/ModalReserveMobile'
 import { setPriority } from 'node:os'
 import { after } from 'lodash'
+import CategoryImageSlider from '@/components/CategoryImageSlider'
 
 
 export interface ListingStayDetailPageProps { }
@@ -89,6 +91,8 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ }) => {
 	const [selectRoomFirstWarning, setSelectRoomFirstWarning] = useState<any>(false)
 	const [numberOfRoomSelected, setNumberOfRoomSelected] = useState<any>(0)
 	const [totalPrice, setTotalPrice] = useState<number>(0);
+	const [propertiesPhotos, setPropertiesPhotos] = useState<any[]>([]);
+	const [isModalOpen, setIsModalOpen] = useState(false);
     const getRoomPrice = (currentActiveRoom: any) => {
 		const price = listingDetail?.rooms?.find((room: any) => room?.room_type?.name.toLowerCase() === currentActiveRoom?.toLowerCase())?.room_price
 		return price;
@@ -142,8 +146,12 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ }) => {
 	}
 
 	const handleOpenModalImageGallery = () => {
-		router.push(`${endPoint}/?modal=PHOTO_TOUR_SCROLLABLE` as Route)
+		// router.push(`${endPoint}/?modal=PHOTO_TOUR_SCROLLABLE` as Route)
+		setIsModalOpen(true);
 	}
+	  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
 
 	const handleRoomChange = (roomType: any, pricePerRoom: any, newSelectedRooms: any) => {
 		const prevSelectedRooms = selectedRooms[roomType] || 0;
@@ -220,6 +228,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ }) => {
 			if (data.status === 'success') {
 				setListingDetail(data.data);
 				setPropertyDates(data?.data?.result?.property_dates || []);
+				setPropertiesPhotos(data?.data?.result?.property_photos || []);
 				const rooms = categorizeRooms(data?.data?.rooms)
 			
 				setCategorizeRooms(rooms)
@@ -430,7 +439,7 @@ useEffect(() => {
 								/>
 							</svg>
 							<span className=" ">
-								<span className="hidden sm:inline-block">No. of rooms: </span> {result?.bedrooms}
+								<span className="hidden sm:inline-block">No. of Rooms: </span> {result?.bedrooms}
 							</span>
 						</div>
 					}
@@ -535,7 +544,7 @@ useEffect(() => {
 								/>
 							</svg>
 							<span className=" ">
-								{result?.bathrooms} <span className="hidden sm:inline-block">baths</span>
+								{result?.bathrooms} <span className="hidden sm:inline-block">Baths</span>
 							</span>
 						</div>
 					}
@@ -907,10 +916,8 @@ useEffect(() => {
 				{/* CONTENT */}
 				<div className={'mt-3'}>
 					{/* {description?.about_place ? parse(description?.about_place) : ''} */}
-
 					Up to 6 years: Complimentary (no extra bed) <br/>
-
-7-12 years : 50% (with extra bed)
+					7-12 years : 50% (with extra bed)
 				</div>
 			</div>
 		)
@@ -1069,18 +1076,18 @@ useEffect(() => {
 							))}
 						</div>
 						)}
-						{/* <div className="flex justify-between text-neutral-600 dark:text-neutral-300"> */}
-							{/* <span> */}
-								{/* <div>₹ {roomPrice} x {daysToStay} night</div> */}
-								{/* <div>₹ {currentroomPrice}<span className='text-xs'>/night</span>  ({numberOfRoomSelected} <span className='text-xs'>room</span> x {daysToStay.toFixed(0)} <span className='text-xs'>day</span>)</div>
+						{/* <div className="flex justify-between text-neutral-600 dark:text-neutral-300">
+							<span>
+								<div>₹ {roomPrice} x {daysToStay} night</div>
+								<div>₹ {currentroomPrice}<span className='text-xs'>/night</span>  ({numberOfRoomSelected} <span className='text-xs'>room</span> x {daysToStay.toFixed(0)} <span className='text-xs'>day</span>)</div>
 								{workationDiscount > 0 && <div className='text-xs text-red-500'>{`Discount: ${workationDiscount}%`}</div>}
-							</span> */}
+							</span>
 							
-							{/* <span className='test'>
+							<span className='test'>
 								<div>₹ {surgedPrice - (extraGuest * currentActiveRoom?.guest_fee)}</div>
 								{workationDiscount > 0 && <span className='text-xs line-through'>₹ {roomPrice * daysToStay}</span>}
-							</span> */}
-						{/* </div> */}
+							</span>
+						</div> */}
 						{/* {extraGuest > 0 &&
 							<div className="flex justify-between text-neutral-600 dark:text-neutral-300">
 								<span>Extra Guest ({extraGuest} x ₹{currentActiveRoom?.guest_fee})</span>
@@ -1088,9 +1095,20 @@ useEffect(() => {
 							</div>} */}
 							{guestChildrenInputValue > 0 &&
 								<div className="flex justify-between text-neutral-600 dark:text-neutral-300">
-										<span>Children ({guestChildrenInputValue} x ₹{(currentActiveRoom?.guest_fee)/2} x {daysToStay.toFixed(0)} <span className="text-xs">day</span>)</span>
-										<span>₹ {(guestChildrenInputValue * ((currentActiveRoom?.guest_fee)/2) * daysToStay) .toFixed(0)}</span>
+										<span>Children ({guestChildrenInputValue} x ₹{currentActiveRoom?.rooms?.[0]?.space_type !== 8 ? ((currentActiveRoom?.guest_fee)/2) : ((currentActiveRoom?.rooms?.[0]?.room_price)/2)} x {daysToStay.toFixed(0)} <span className="text-xs">day</span>)</span>
+										<span>
+											₹{(
+												guestChildrenInputValue *
+												(
+												currentActiveRoom?.rooms?.[0]?.space_type !== 8
+													? (currentActiveRoom?.guest_fee ?? 0) / 2
+													: (currentActiveRoom?.rooms?.[0]?.room_price ?? 0) / 2
+												) *
+												daysToStay
+											).toFixed(0)}
+											</span>
 									</div>
+									
 							}
 							{extraGuest > 0 &&
 									<div className="flex justify-between text-neutral-600 dark:text-neutral-300">
@@ -1133,7 +1151,7 @@ useEffect(() => {
 						<div className="border-b border-neutral-200 dark:border-neutral-700"></div>
 						<div className="flex justify-between font-semibold">
 							<span>Total</span>
-							<span className='flex'>₹<PriceCalculator totalPrice={totalPrice} setTotalPrice={setTotalPrice} extraGuest={extraGuest} extraGuestPrice={(currentActiveRoom?.guest_fee)*daysToStay} guestChildrenInputValue={guestChildrenInputValue} childrenPricePerHead={((currentActiveRoom?.guest_fee ?? 0) / 2)*daysToStay} setWorkationDiscount={setWorkationDiscount} propertyType={listingDetail?.result?.property_type?.name} daysToStay={daysToStay.toFixed(2)} workStation={listingDetail?.WorkStation} startDate={startDate} endDate={endDate} normalFare={roomPrice} propertyDates={propertyDates} setSurgedPrice={setSurgedPrice} convenienceFee={convenienceFee} gst={gst} /></span>
+							<span className='flex'>₹<PriceCalculator totalPrice={totalPrice} setTotalPrice={setTotalPrice} extraGuest={extraGuest} extraGuestPrice={(currentActiveRoom?.guest_fee)*daysToStay} guestChildrenInputValue={guestChildrenInputValue} childrenPricePerHead={(currentActiveRoom?.rooms?.[0]?.space_type !==8 ? (currentActiveRoom?.guest_fee ?? 0) / 2 : (currentActiveRoom?.rooms?.[0]?.room_price ?? 0) / 2)*daysToStay} setWorkationDiscount={setWorkationDiscount} propertyType={listingDetail?.result?.property_type?.name} daysToStay={daysToStay.toFixed(2)} workStation={listingDetail?.WorkStation} startDate={startDate} endDate={endDate} normalFare={roomPrice} propertyDates={propertyDates} setSurgedPrice={setSurgedPrice} convenienceFee={convenienceFee} gst={gst} /></span>
 						</div>
 					</div>
 				}
@@ -1178,6 +1196,7 @@ useEffect(() => {
 		)
 	}
 	//    console.log(surgedPrice,"rtdgs")
+	console.log(currentActiveRoom, "currentactiveRoom")
 	const renderMobileSidebar = () => {
 		return (
 			<div className="fixed inset-x-0 bottom-0 z-40 block border-t border-neutral-200 bg-white py-2 dark:border-neutral-600 dark:bg-neutral-800 sm:py-3 lg:hidden">
@@ -1227,6 +1246,7 @@ useEffect(() => {
 
 		const renderRoomSection = ({ rooms }: any) => {
 			// console.log(categorizedRooms,"ldk;lfklds")
+			console.log(rooms,'rooms details')
 			return (
 				<>
 					<div className='listingSection__wrap cstm-padding'>
@@ -1539,7 +1559,7 @@ useEffect(() => {
 	const { result, amenities, attractions, excursions, rooms } = listingDetail ?? {}; // Use nullish coalescing (??) to provide a fallback empty object
 	const { description } = listingDescription ?? {};
 	console.log(rooms, "rooms");
- //console.log("result",result)
+    //console.log("result",result)
 
 	return (
 		<div className="nc-ListingStayDetailPage">
@@ -1566,6 +1586,7 @@ useEffect(() => {
 								}`}
 						>
 							<div className="aspect-h-4 aspect-w-6">
+								
 								<Image
 									fill
 									className="rounded-md object-cover"
@@ -1593,6 +1614,30 @@ useEffect(() => {
 						</span>
 					</button>
 				</div>
+				{/* Modal Overlay */}
+				<div
+					className={`fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center transition-opacity duration-300 ${
+					isModalOpen ? "opacity-100 visible" : "opacity-0 invisible"
+					}`}
+				>
+				{/* Modal Content */}
+				<div
+				className={`relative bg-white rounded-lg shadow-lg max-w-5xl w-full max-h-[120vh] overflow-y-auto p-4 transform transition-all duration-300 ${
+					isModalOpen ? "scale-100" : "scale-95"
+				}`}
+				>
+				{/* Close Button */}
+				<button
+					onClick={handleCloseModal}
+					className="absolute top-2 right-2 bg-gray-200 p-1 rounded-full hover:bg-gray-300"
+				>
+					<XMarkIcon className="w-6 h-6 text-gray-700" />
+				</button>
+
+				{/* Slider */}
+				<CategoryImageSlider propertiesPhotos={propertiesPhotos} />
+				</div>
+			</div>
 			</header>
 
 			{/* MAIN */}
@@ -1638,6 +1683,8 @@ useEffect(() => {
 					{renderMobileSidebar()}
 				</div>
 			</main>
+			
+				  
 		</div>
 	)
 }

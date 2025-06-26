@@ -45,11 +45,15 @@ const SearchResultsPage = () => {
                   price={home.min_room_price}
                   rating={home.overall_rating}
                   reviews={home.reviews_count}
-                    images={
-                      Array.isArray(home.property_photos) && home.property_photos.length > 0
-                        ? home.property_photos.map((photo: { image_url: string }) => photo.image_url)
-                        : [home.property_photo]
-                    }
+                  coverImage={home.cover_photo} 
+                     images={[
+                      home.cover_photo,
+                      ...(Array.isArray(home.property_photos)
+                        ? home.property_photos
+                            .filter((photo: any) => photo.image_url !== home.cover_photo) // avoid duplicating cover
+                            .map((photo: { image_url: string }) => photo.image_url)
+                        : []),
+                    ]}
                 />
              
               

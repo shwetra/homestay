@@ -1,5 +1,5 @@
 import React from "react";
-import GallerySlider4 from '@/components/GallerySlider4'
+import GallerySlider2 from '@/components/GallerySlider2'
 import StartRating from '@/components/StartRating'
 import BtnLikeIcon from '@/components/BtnLikeIcon'
 import Link from "next/link";
@@ -14,6 +14,7 @@ interface HomestayCardProps {
   rating: number;
   reviews: number;
   images: string[];
+  coverImage?: string;
   id: string | number;
   slug:string;
 }
@@ -29,6 +30,7 @@ const HomestayCard: React.FC<HomestayCardProps> = ({
   images,
   id,
   slug,
+  coverImage,
   }) => {
   const settings = {
     dots: true,
@@ -44,9 +46,10 @@ const HomestayCard: React.FC<HomestayCardProps> = ({
    <>
     <div className="bg-white rounded-2xl shadow-md overflow-hidden max-w-sm">
       <div className="relative">
-       <GallerySlider4
+       <GallerySlider2
         uniqueID={`${id}`}
         ratioClass="aspect-w-12 aspect-h-8"
+        coverImage={coverImage}
         galleryImgs={images}
         imageClass="rounded-lg"
         href={`/property/${slug}`}

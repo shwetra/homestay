@@ -58,10 +58,10 @@ const SectionGridHasMap: FC<SectionGridHasMapProps> = ({ stayListings, city }) =
 					<div className="mb-8 lg:mb-11">
 						<details className='hidden sm:block'>
 							<summary className='mb-5 border-2 px-4 py-2 rounded-full w-fit'>Filters:</summary>
-							<TabFilters />
+							{/* <TabFilters /> */}
 						</details>
 						<div className='sm:hidden'>
-							<TabFilters />
+							{/* <TabFilters /> */}
 						</div>
 					</div>
 					{

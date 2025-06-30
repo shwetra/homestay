@@ -131,7 +131,6 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ }) => {
 
 
 
-
 	const thisPathname = usePathname()
 	let endPoint = thisPathname.split('/').pop();
 	const router = useRouter()
@@ -207,11 +206,32 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ }) => {
 	// 	setTotalFee(total);
 	//   };
 
-
+			{/*Calendar Price total*/}
+			const getDateRange = (start: Date, end: Date): string[] => {
+			const dates: string[] = [];
+			let current = new Date(start);
+			while (current <= end) {
+				dates.push(current.toISOString().split("T")[0]);
+				current.setDate(current.getDate() + 1);
+			}
+			return dates;
+			};
+			const getAveragePriceAdjustment = (selectedDates: string[], propertyDates: any[]) => {
+			const matched = propertyDates.filter((pd) => selectedDates.includes(pd.date));
+			const totalPercent = matched.reduce((sum, pd) => sum + (pd.price || 0), 0);
+			const average = matched.length ? totalPercent / matched.length : 0;
+			return average;
+			};
+			const selectedDates: string[] = startDate && endDate
+				? getDateRange(startDate, endDate)
+				: [];
+			const priceAdjustmentPercent = getAveragePriceAdjustment(selectedDates, propertyDates);
+			{/*End Calendar Price total*/}
 	useEffect(() => {
 		calculateTotalFee()
 	}, [listingDetail, daysToStay, roomPrice, startDate, endDate]);
-
+    // console.log(roomPrice, "roomPriceTest")
+	//console.log(listingDetail, "listingDetailTest")
 	// ---------------
 	// const [listingDetail, setListingDetail] = useState<any>({})
 	const [listingDescription, setListingDescription] = useState<any>()
@@ -237,13 +257,14 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ }) => {
 				const photos = data.data.result?.property_photos;
 				// ?.map((photo: any) => photo.image_url) 
 				setImagess(photos || [])
+				
 			}
 		} catch (error) {
 			console.error(error);
 		}
 	}, [endPoint])
-
-
+	
+	console.log(propertyDates, "propertyDatesNow")
 	// propety list description
 	const fetchListingDescription = useCallback(async () => {
 		try {
@@ -577,9 +598,9 @@ useEffect(() => {
 			<div className="listingSection__wrap cstm-padding">
 				<div>
 					<h2 className="text-2xl font-semibold">Facilities </h2>
-					<span className="mt-2 block text-neutral-500 dark:text-neutral-400">
+					{/* <span className="mt-2 block text-neutral-500 dark:text-neutral-400">
 						{` About the property's amenities and services`}
-					</span>
+					</span> */}
 				</div>
 				{/* 6 */}
 				<div className="flex gap-5 flex-wrap mt-3">
@@ -949,7 +970,7 @@ useEffect(() => {
 					{description?.guestsactivity?.map((item: any, index: number) => (
 						<div key={index} className="flex items-center space-x-3">
 							{/* <strong className='text-[1.5rem] text-gray-500'>&bull;</strong> */}
-							<span className=" ">{item}</span>
+							<span className="activities">{parse(item)}</span>
 						</div>
 					))}
 				</div>
@@ -997,14 +1018,14 @@ useEffect(() => {
 	}
 
 	const renderSidebar = ({ result }: any) => {
+		const roomOrder = ["Classic", "Superior", "Premium"];
 		return (
 			<div className="listingSectionSidebar__wrap shadow-xl mt-[6rem] sm:mt-0 cstm-padding">
 				{/* PRICE */}
 				<div className="flex justify-between">
 					<span className="text-xl font-semibold">
-						{/* {result?.property_price?.currency_code} {result?.property_price?.price} */}
-						₹{roomPrice}
-						<span className="ml-1 text-base font-normal text-neutral-500 dark:text-neutral-400">
+					₹{roomPrice}
+						 <span className="ml-1 text-base font-normal text-neutral-500 dark:text-neutral-400">
 							/night
 						</span>
 					</span>
@@ -1018,7 +1039,7 @@ useEffect(() => {
 
 				{/* FORM */}
 				<form className="flex flex-col rounded-3xl border border-neutral-200 dark:border-neutral-700 mt-3">
-					<StayDatesRangeInput previousPrice={currentroomPrice} propertyDates={result?.property_dates} setDaysToStay={setDaysToStay} startDate={startDate} setStartDate={setStartDate} endDate={endDate} setEndDate={setEndDate} className="z-[11] flex-1 cstm-btn-padding" />
+					<StayDatesRangeInput previousPrice={currentroomPrice} workation= {result?.property_type?.name} propertyDates={result?.property_dates} setDaysToStay={setDaysToStay} startDate={startDate} setStartDate={setStartDate} endDate={endDate} setEndDate={setEndDate} className="z-[11] flex-1 cstm-btn-padding" />
 					<div className="w-full border-b border-neutral-200 dark:border-neutral-700"></div>
 						<GuestsInput
 						setNumberOfRoomSelected={setNumberOfRoomSelected}
@@ -1038,44 +1059,122 @@ useEffect(() => {
 						className="flex-1 cstm-btn-padding" />
 				</form>
 
-				{/* extra guest  */}
-				{/* <div className='flex justify-between items-center'>
-					<div>
-						<p>Add Extra Guest</p>
-						<p className='text-sm'>{currentActiveRoom?.guest_fee > 0 && (`(₹${currentActiveRoom?.guest_fee}/person)`)}</p>
-					</div>
-					<select
-						id="rooms"
-						className="bg-gray-50 w-full max-w-[9rem] my-2 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-[#111827] dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-						onChange={(e) => { setExtraGuest(e.target.value), setGuestLimitExceed(false) }}
-					>
-						<option value='0'>Select</option>
-						<option value='1'>1</option>
-						<option value='2'>2</option>
-						<option value='3'>3</option>
-						<option value='4'>4</option>
-					</select>
-				</div> */}
 
 				{/* SUM */}
-				{
+				
+				{	
 					roomPrice !== 0 &&
 					<div className="flex flex-col space-y-1 mt-3">
-						{selectedRooms.length > 0 && (
+						{/* {selectedRooms.length > 0 && (
 						<div className="flex flex-col space-y-1 text-neutral-600 dark:text-neutral-300">
-							{selectedRooms.map((room, index) => (
-							<div key={index} className="flex justify-between">
-								<span>
-								₹ {room.room_price}
-								<span className="text-xs">/night</span> {room.space_type !== 8 ? room.type : ""} (
-								{room.count} <span className="text-xs">{room.space_type === 8 ? "Person" : "room"}</span> x{" "}
-								{daysToStay.toFixed(0)} <span className="text-xs">day</span>)
-								</span>
-								<span>₹ {(room.room_price * room.count * daysToStay).toFixed(0)}</span>
-							</div>
-							))}
+							{selectedRooms
+							.slice()
+							.sort((a, b) => {
+								const indexA = roomOrder.indexOf(a.type);
+								const indexB = roomOrder.indexOf(b.type);
+								return (indexA === -1 ? 999 : indexA) - (indexB === -1 ? 999 : indexB);
+							})
+							.map((room, index) => {
+								const priceAdjustment = propertyDates?.[0]?.price || 0;
+								const adjustedNightlyPrice = room.room_price + (room.room_price * priceAdjustment / 100);
+								const total = adjustedNightlyPrice * room.count * daysToStay;
+
+								return (
+								<div key={index} className="flex justify-between">
+									<span>
+									₹{adjustedNightlyPrice.toFixed(0)}
+									<span className="text-xs">/night</span>{" "}
+									{room.space_type !== 8 ? room.type : ""} (
+									{room.count}{" "}
+									<span className="text-xs">
+										{room.space_type === 8 ? "Person" : "room"}
+									</span>{" "}
+									x {daysToStay.toFixed(0)}{" "}
+									<span className="text-xs">day</span>)
+									</span>
+									<span>
+									₹{total.toFixed(0)}
+									</span>
+								</div>
+								);
+							})}
 						</div>
-						)}
+						)} */}
+								{selectedRooms.length > 0 && (
+								<div className="flex flex-col space-y-1 text-neutral-600 dark:text-neutral-300">
+									{selectedRooms
+									.slice()
+									.sort((a, b) => {
+										const indexA = roomOrder.indexOf(a.type);
+										const indexB = roomOrder.indexOf(b.type);
+										return (indexA === -1 ? 999 : indexA) - (indexB === -1 ? 999 : indexB);
+									})
+									.map((room, index) => {
+										const adjustedNightlyPrice =
+										room.room_price + (room.room_price * priceAdjustmentPercent) / 100;
+
+										const total = adjustedNightlyPrice * room.count * daysToStay;
+
+										return (
+										<div key={index} className="flex justify-between items-center">
+											<span>
+											₹{adjustedNightlyPrice.toFixed(0)}
+											<span className="text-xs">/night</span>{" "}
+											{room.space_type !== 8 ? room.type : ""} (
+											{room.count}{" "}
+											<span className="text-xs">
+												{room.space_type === 8 ? "Person" : "room"}
+											</span>{" "}
+											x {daysToStay.toFixed(0)}{" "}
+											<span className="text-xs">day</span>)
+											{/* {priceAdjustmentPercent > 0 && (
+												<span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-green-100 text-green-700">
+												+{priceAdjustmentPercent}% price
+												</span>
+											)} */}
+											</span>
+											<span>₹{total.toFixed(0)}</span>
+										</div>
+										);
+									})}
+								</div>
+								)}
+
+
+					
+{/* 
+					{selectedRooms.length > 0 && (
+							<div className="flex flex-col space-y-1 text-neutral-600 dark:text-neutral-300">
+								{selectedRooms
+								.slice() // clone the array to avoid mutating state
+								.sort((a, b) => {
+									const indexA = roomOrder.indexOf(a.type);
+									const indexB = roomOrder.indexOf(b.type);
+
+									// Items not in the list get pushed to the end
+									return (indexA === -1 ? 999 : indexA) - (indexB === -1 ? 999 : indexB);
+								})
+								.map((room, index) => (
+									<div key={index} className="flex justify-between">
+									<span>
+										₹ {room.room_price+(room.room_price * propertyDates?.price/100)}
+										<span className="text-xs">/night</span>{" "}
+										{room.space_type !== 8 ? room.type : ""} (
+										{room.count}{" "}
+										<span className="text-xs">
+										{room.space_type === 8 ? "Person" : "room"}
+										</span>{" "}
+										x {daysToStay.toFixed(0)}{" "}
+										<span className="text-xs">day</span>)
+									</span>
+									<span>
+										₹{((room.room_price+(room.room_price * propertyDates?.price/100)) * room.count * daysToStay).toFixed(0)}
+									</span>
+									</div>
+								))}
+							</div>
+							)} */}
+
 						{/* <div className="flex justify-between text-neutral-600 dark:text-neutral-300">
 							<span>
 								<div>₹ {roomPrice} x {daysToStay} night</div>
@@ -1088,17 +1187,12 @@ useEffect(() => {
 								{workationDiscount > 0 && <span className='text-xs line-through'>₹ {roomPrice * daysToStay}</span>}
 							</span>
 						</div> */}
-						{/* {extraGuest > 0 &&
-							<div className="flex justify-between text-neutral-600 dark:text-neutral-300">
-								<span>Extra Guest ({extraGuest} x ₹{currentActiveRoom?.guest_fee})</span>
-								<span>₹ {(extraGuest * currentActiveRoom?.guest_fee).toFixed(2)}</span>
-							</div>} */}
+						
 							{guestChildrenInputValue > 0 &&
 								<div className="flex justify-between text-neutral-600 dark:text-neutral-300">
 										<span>Children ({guestChildrenInputValue} x ₹{currentActiveRoom?.rooms?.[0]?.space_type !== 8 ? ((currentActiveRoom?.guest_fee)/2) : ((currentActiveRoom?.rooms?.[0]?.room_price)/2)} x {daysToStay.toFixed(0)} <span className="text-xs">day</span>)</span>
 										<span>
-											₹{(
-												guestChildrenInputValue *
+											₹{(guestChildrenInputValue *
 												(
 												currentActiveRoom?.rooms?.[0]?.space_type !== 8
 													? (currentActiveRoom?.guest_fee ?? 0) / 2
@@ -1113,17 +1207,17 @@ useEffect(() => {
 							{extraGuest > 0 &&
 									<div className="flex justify-between text-neutral-600 dark:text-neutral-300">
 										<span>Extra Guest ({extraGuest} x ₹{currentActiveRoom?.guest_fee} x {daysToStay.toFixed(0)} <span className="text-xs">day</span>)</span>
-										<span>₹ {((extraGuest * currentActiveRoom?.guest_fee) * daysToStay).toFixed(0)}</span>
+										<span>₹{((extraGuest * currentActiveRoom?.guest_fee) * daysToStay).toFixed(0)}</span>
 									</div>
 									}
 							
 						<div className="flex justify-between text-neutral-600 dark:text-neutral-300">
 							<span>Convenience Fee ({convenienceFee}%)</span>
-							<span>₹ {((convenienceFee / 100) * surgedPrice).toFixed(0)}</span>
+							<span>₹{((convenienceFee / 100) * surgedPrice).toFixed(0)}</span>
 						</div>
 						<div className="flex justify-between text-neutral-600 dark:text-neutral-300">
 							<span>GST ({gst}%)</span>
-							<span>₹ {((surgedPrice + ((convenienceFee / 100) * surgedPrice)) * (gst / 100)).toFixed(2)}</span>
+							<span>₹{((surgedPrice + ((convenienceFee / 100) * surgedPrice)) * (gst / 100)).toFixed(0)}</span>
 						</div>
 						{/* {surgedPrice - (roomPrice * daysToStay) > 0 && 
 						<div className="flex justify-between text-neutral-600 dark:text-neutral-300">
@@ -1155,7 +1249,7 @@ useEffect(() => {
 						</div>
 					</div>
 				}
-				
+			
                
 					
 					

@@ -11,6 +11,7 @@ import { CalendarIcon } from '@heroicons/react/24/outline'
 import DatePickerCustomHeaderTwoMonth from '@/components/DatePickerCustomHeaderTwoMonth'
 import DatePickerCustomDay from '@/components/DatePickerCustomDay'
 import DatePicker from 'react-datepicker'
+import { toast } from 'react-toastify'
 import ClearDataButton from '@/app/(client-components)/(HeroSearchForm)/ClearDataButton'
 
 export interface StayDatesRangeInputProps {
@@ -22,22 +23,53 @@ export interface StayDatesRangeInputProps {
 	setEndDate?: any,
 	propertyDates?: any,
 	previousPrice?: any,
+	workation?:any,
 }
 
 const StayDatesRangeInput: FC<StayDatesRangeInputProps> = ({
-	className = 'flex-1', setDaysToStay, startDate, setStartDate, endDate, setEndDate, propertyDates, previousPrice
+	className = 'flex-1', setDaysToStay, startDate, setStartDate, endDate, setEndDate, propertyDates, previousPrice, workation
 }) => {
 
-	const onChangeDate = (dates: [Date | null, Date | null], closePopover: () => void) => {
-		const [start, end] = dates
-		setStartDate(start)
-		setEndDate(end)
+	// const onChangeDate = (dates: [Date | null, Date | null], closePopover: () => void) => {
+	// 	const [start, end] = dates
+	// 	setStartDate(start)
+	// 	setEndDate(end)
 
-		// Close popover when end date is selected
-		if (start && end) {
-			closePopover()
-		}
-	}
+	// 	// Close popover when end date is selected
+	// 	if (start && end) {
+	// 		closePopover()
+	// 	}
+	// }
+useEffect(() => {
+  if (
+    workation === 'Workation' &&
+    !startDate &&
+    !endDate
+  ) {
+    const today = new Date();
+    const nextWeek = new Date();
+    nextWeek.setDate(today.getDate() + 7);
+
+    setStartDate(today);
+    setEndDate(nextWeek);
+    setDaysToStay(7);
+  }
+}, [workation]);
+const onChangeDate = (dates: [Date | null, Date | null], closePopover: () => void) => {
+  const [start, end] = dates;
+  if (workation === 'Workation' && start && end) {
+    const diffDays = (end.getTime() - start.getTime()) / (1000 * 3600 * 24);
+    if (diffDays < 7) {
+      toast.error("Workation requires a minimum stay of 7 days.");
+      return; // Do not apply dates
+    }
+  }
+
+  setStartDate(start);
+  setEndDate(end);
+
+  if (start && end) closePopover();
+};
 
 	useEffect(() => {
 		if (startDate && endDate) {
@@ -115,23 +147,7 @@ const StayDatesRangeInput: FC<StayDatesRangeInputProps> = ({
 					>
 						<PopoverPanel className="absolute left-auto right-0 top-full z-10 mt-3 w-screen max-w-sm px-4 sm:px-0 lg:max-w-3xl xl:-right-10">
 							<div className="overflow-hidden rounded-3xl bg-white p-2 shadow-lg ring-1 ring-black ring-opacity-5 dark:bg-neutral-800 cstm-cal">
-								{/* <DatePicker
-									selected={startDate}
-									// onChange={onChangeDate}
-									onChange={(dates) => onChangeDate(dates as [Date | null, Date | null], close)}
-									startDate={startDate}
-									endDate={endDate}
-									selectsRange
-									monthsShown={2}
-									showPopperArrow={false}
-									inline
-									renderCustomHeader={(p) => (
-										<DatePickerCustomHeaderTwoMonth {...p} />
-									)}
-									renderDayContents={(day, date) => (
-										<DatePickerCustomDay dayOfMonth={day} date={date} />
-									)}
-								/> */}
+								
 
 								<DatePicker
 									selected={startDate}

@@ -69,7 +69,7 @@ const totalCapacity = currentActiveRoom?.rooms?.reduce(
 const guestAfterCapacity = totalCapacity - totalLengthAccommodates;
 // Infants Maximum Limit 2
 const infantsMaximumLimit = currentActiveRoom?.rooms?.reduce(
-  (acc: number, room: any) => acc + (Number(2) * Number(room.count || 0)),
+  (acc: number, room: any) => acc + (Number(1) * Number(room.count || 0)),
   0
 ) || 0;
 const hasSpaceType8 = currentActiveRoom?.rooms?.some(

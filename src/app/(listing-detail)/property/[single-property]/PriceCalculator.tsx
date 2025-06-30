@@ -110,15 +110,16 @@ const PriceCalculator = ({
       if (validTiers.length > 0) {
         const bestTier = validTiers[0]; // Highest applicable discount
         const discountValue = bestTier.discount;
-    
         setWorkationDiscount(discountValue); // Update external state
         total -= total * (discountValue / 100);
+       
       } else {
         setWorkationDiscount(0); // No discount applies
       }
     }
     
-
+   
+        
       setSurgedPrice(total);
 
       // applying convenienceFee and gst 
@@ -131,7 +132,7 @@ const PriceCalculator = ({
     calculateTotalPrice();
   }, [startDate,endDate,normalFare,propertyDates,setSurgedPrice,convenienceFee,gst,daysToStay,propertyType,workStation,setWorkationDiscount,extraGuestPrice, extraGuest, guestChildrenInputValue, childrenPricePerHead, totalPrice, setTotalPrice]); // Added surgedPrice to dependencies
 
-  return <p>{totalPrice.toFixed(2)}</p>;
+  return <p>{totalPrice.toFixed(0)}</p>;
 };
 
 export default PriceCalculator;

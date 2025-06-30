@@ -1,5 +1,5 @@
 'use client'
-import React, { FC, useEffect, useState } from "react";
+import React, { FC, useEffect, useState, useRef } from "react";
 import SectionGridFilterCard from "../../../SectionGridFilterCard";
 import axios from "axios";
 import { useImages } from "@/app/contextApi/ImageContext";
@@ -33,7 +33,7 @@ const ListingStayPage: FC<ListingStayPageProps> = () => {
   // const [stayType, setStayType] = useState<any>()
   const [loading, setLoading] = useState<boolean>(false)
   const [showMoreLoading, setShowMoreLoading] = useState<boolean>(false)
-  const [toSlice, setToSlice] = useState<number>(8)
+  const [toSlice, setToSlice] = useState<number>(24)
 
 
   const location = useLocation()
@@ -57,28 +57,34 @@ const ListingStayPage: FC<ListingStayPageProps> = () => {
     }
   }
 
-  const handleShowMore = () => {
-    setShowMoreLoading(true);
-  
-    setTimeout(() => {
-      setToSlice(prev => prev + 8);
-      setShowMoreLoading(false);
-    }, 1000); // simulate 1 second loading
-  };
 
   useEffect(() => {
     fetchFilteredProperties()
   }, [state, stayType])
 
-  // useEffect(() => {
-  //   if (!location?.pathname) return
+  const observerRef = useRef<HTMLDivElement | null>(null);
 
-  //   const segments = location.pathname.split('/').filter(Boolean)
-  //   if (segments.length >= 3) {
-  //     setStayType(segments[1])
-  //     setState(segments[2])
-  //   }
-  // }, [location?.pathname])
+useEffect(() => {
+  const observer = new IntersectionObserver((entries) => {
+    const target = entries[0];
+    if (target.isIntersecting && allProperties[0]?.properties?.length > toSlice) {
+      setToSlice((prev) => prev + 8);
+    }
+  }, {
+    rootMargin: "0px",
+    threshold: 1.0,
+  });
+
+  if (observerRef.current) {
+    observer.observe(observerRef.current);
+  }
+
+  return () => {
+    if (observerRef.current) {
+      observer.unobserve(observerRef.current);
+    }
+  };
+}, [toSlice, allProperties]);
 
   
   // convert state name to valid syntax 
@@ -121,27 +127,26 @@ const ListingStayPage: FC<ListingStayPageProps> = () => {
       <Heading1 heading= {`Stays in ${formatName(renderState(state))}`} />
       
 
-      {hasAnyProperties ?
-
+      {hasAnyProperties && (
+        <>
         <div className="grid grid-cols-1 gap-6 md:gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {allProperties?.map((stay: any, index: number) => (
             <StayCard2 key={index} toSlice={toSlice} data={stay} />
           ))}
         </div>
-
-        : ""}
+         <div ref={observerRef} className="h-10" />
+         </>
+       )}
 
         {
           allProperties[0]?.properties?.length === 0 && "No Properties Found"
         }
 
-          {/* Load more button  */}
-          {allProperties[0]?.properties?.length > toSlice &&
-            <div className="mt-16 flex items-center justify-center">
-            <ButtonPrimary loading={showMoreLoading} onClick={handleShowMore}>Show more</ButtonPrimary>
-          </div>}
+         
+         
 
     </div>
+    
   )
 };
 

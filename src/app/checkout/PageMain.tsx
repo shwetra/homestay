@@ -1,6 +1,6 @@
 'use client'
 
-import React, { FC, useState } from 'react'
+import React, { FC, useState} from 'react'
 import Image from 'next/image'
 import axios from 'axios'
 import { toast } from 'react-toastify'
@@ -16,9 +16,18 @@ import ButtonPrimary from '@/shared/ButtonPrimary'
 import NcModal from '@/shared/NcModal'
 
 import converSelectedDateToString from '@/utils/converSelectedDateToString'
-
+export interface SelectedRoom {
+  room_id: number
+  count: number
+  type: string
+  room_price: number
+}
 export interface CheckOutPagePageMainProps {
   className?: string
+  selectedRooms?: SelectedRoom[]
+  cleaningFee?: number
+  securityFee?: number
+  weekendPrice?: number
   startDate?: Date | null
   endDate?: Date | null
   guestAdultsInputValue?: number
@@ -28,6 +37,7 @@ export interface CheckOutPagePageMainProps {
   numberOfRoomSelected?: number
   daysToStay?: number
   workationDiscount?: number
+  adjustedNightPrice?: number
   surgedPrice?: number
   extraGuest?: number
   currentActiveRoom?: {
@@ -38,16 +48,23 @@ export interface CheckOutPagePageMainProps {
   roomPrice?: number
   totalPrice?: number
   result?: any
+  discountPercentage?: number
 }
 
 const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
   className = '',
   startDate,
+  discountPercentage,
+  cleaningFee = 0,
+  securityFee = 0,  
+  weekendPrice = 0,
+  adjustedNightPrice = 0,
   endDate,
   guestAdultsInputValue = 0,
   guestChildrenInputValue = 0,
   guestInfantsInputValue = 0,
   currentroomPrice = 0,
+  selectedRooms = [],
   numberOfRoomSelected,
   daysToStay = 1,
   workationDiscount = 0,
@@ -81,7 +98,19 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
   const totleguests = guestAdultsInputValue + guestChildrenInputValue + guestInfantsInputValue + extraGuest
 
   const roomsid = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('selectedRoom') || 'null') : null
- 
+ const propertyDates = result?.property_dates || [];
+  const getDateRange = (start: Date, end: Date): string[] => {
+  const dates: string[] = [];
+  let current = new Date(start);
+  while (current < end) { // Important: `< end` makes it night-based
+    dates.push(current.toISOString().split("T")[0]);
+    current.setDate(current.getDate() + 1);
+  }
+  return dates;
+};
+
+  
+  
   const [formData, setFormData] = useState({
     first_name: '',
     last_name: '',
@@ -130,7 +159,7 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
       }
     
   }
-
+// console.log("selectedRoomsTestPage:", selectedRooms);
   const renderSidebar = () => (
     <div className="flex w-full flex-col space-y-6 border-neutral-200 px-0 dark:border-neutral-700 sm:space-y-8 sm:rounded-2xl sm:p-6 lg:border xl:p-8">
       <div className="flex flex-col sm:flex-row sm:items-center">
@@ -184,53 +213,98 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
         />
       </div>
       <div className="flex flex-col space-y-4">
-      
-        <div className="flex justify-between text-neutral-600 dark:text-neutral-300">
+        {selectedRooms.map((room, index) => {
+  const selectedDates: string[] = startDate && endDate ? getDateRange(startDate, endDate) : [];
+
+  const priceMap = new Map<number, number>();
+
+  selectedDates.forEach(date => {
+    const pd = propertyDates.find((p: any) => p.date === date);
+    const pricePercent = pd?.price ?? 0;
+    const adjusted = room.room_price + (room.room_price * pricePercent / 100);
+    const key = Math.round(adjusted);
+    priceMap.set(key, (priceMap.get(key) || 0) + 1);
+  });
+
+  const groups = Array.from(priceMap.entries()).map(([adjusted, days]) => ({
+    adjusted,
+    days,
+    total: adjusted * room.count * days,
+  }));
+
+  return (
+    <div key={index}>
+      {groups.map((g, idx) => (
+        <div key={idx} className="flex justify-between">
           <span>
-            <div>
-              ₹ {currentroomPrice}
-              <span className="text-xs">/night</span> ({numberOfRoomSelected}{' '}
-              <span className="text-xs">room</span> x {daysToStay.toFixed(0)}{' '}
-              <span className="text-xs">day</span>)
-            </div>
-            {workationDiscount > 0 && (
-              <div className="text-xs text-red-500">{`Discount: ${workationDiscount}%`}</div>
-            )}
+            ₹{g.adjusted}
+            <span className="text-xs">/night</span>{' '}
+            <span className="text-base font-medium">{room.type}</span>{' '}
+            ({room.count} <span className="text-xs">room x </span>
+            {g.days} <span className="text-xs">day</span>)
           </span>
-          <span>
-            {/* <div>₹ {surgedPrice - extraGuest * (currentActiveRoom?.guest_fee || 0)}</div> */}
-            <div>₹ {(roomPrice * daysToStay).toFixed(2)}</div> 
-            {workationDiscount > 0 && (
-              <span className="text-xs line-through">₹ {(roomPrice * daysToStay).toFixed(2)}</span>
-            )}
-          </span>
+          <span>₹{g.total}</span>
         </div>
+      ))}
+    </div>
+  );
+})}
+
+      {workationDiscount > 0 && (
+        <div className="flex justify-between text-neutral-600 dark:text-neutral-300">
+            <span className="px-3 py-1 text-xs rounded-full bg-green-100 text-green-700">{`Discount: ${discountPercentage}%`}</span>
+            <span>₹{(workationDiscount).toFixed(0)}</span>
+        </div>
+        )}
         {extraGuest > 0 && (
           <div className="flex justify-between text-neutral-600 dark:text-neutral-300">
             <span>
               Extra Guest ({extraGuest} x ₹{currentActiveRoom?.guest_fee} x {daysToStay}/Day)
             </span>
-            <span>₹ {(extraGuest * (currentActiveRoom?.guest_fee || 0))*daysToStay}</span>
+            <span>₹{(extraGuest * (currentActiveRoom?.guest_fee || 0))*daysToStay}</span>
           </div>
         )}
         {guestChildrenInputValue > 0 &&
 								<div className="flex justify-between text-neutral-600 dark:text-neutral-300">
 										<span>Children ({guestChildrenInputValue} x ₹{(currentActiveRoom?.guest_fee)/2} x {daysToStay.toFixed(0)} <span className="text-xs">day</span>)</span>
-										<span>₹ {(guestChildrenInputValue * ((currentActiveRoom?.guest_fee)/2) * daysToStay) .toFixed(0)}</span>
+										<span>₹{(guestChildrenInputValue * ((currentActiveRoom?.guest_fee)/2) * daysToStay) .toFixed(0)}</span>
 									</div>
 							}
+            {selectedRooms?.length > 0 && (
+							<>
+								{cleaningFee > 0 && (
+								<div className="flex justify-between text-neutral-600 dark:text-neutral-300">
+									<span>Cleaning Fee</span>
+									<span>₹{cleaningFee}</span>
+								</div>
+								)}
+
+								{securityFee > 0 && (
+								<div className="flex justify-between text-neutral-600 dark:text-neutral-300">
+									<span>Security Fee</span>
+									<span>₹{securityFee}</span>
+								</div>
+								)}
+
+								{weekendPrice > 0 && (
+								<div className="flex justify-between text-neutral-600 dark:text-neutral-300">
+									<span>Weekend Price</span>
+									<span>₹{weekendPrice}</span>
+								</div>
+								)}
+							</>
+							)}
         <div className="flex justify-between text-neutral-600 dark:text-neutral-300">
           <span>Convenience Fee ({convenienceFee}%)</span>
-          <span>₹ {((convenienceFee / 100) * surgedPrice).toFixed(2)}</span>
+          <span>₹{((convenienceFee / 100) * surgedPrice).toFixed(0)}</span>
         </div>
         <div className="flex justify-between text-neutral-600 dark:text-neutral-300">
           <span>GST ({gst}%)</span>
           <span>
-            ₹
-            {(
+            ₹{(
               (surgedPrice + (convenienceFee / 100) * surgedPrice) *
               (gst / 100)
-            ).toFixed(2)}
+            ).toFixed(0)}
           </span>
         </div>
         <div className="border-b border-neutral-200 dark:border-neutral-700"></div>

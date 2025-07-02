@@ -23,11 +23,6 @@ const ListingStayPage: FC<ListingStayPageProps> = () => {
   const stayType = params['stay-type'];
   const state = params['state'];
   console.log(params['stay-type'], params['state']);
-
-
-
-
-  
   const { allProperties, setAllProperties } = useImages()
   // const [state, setState] = useState<any>()
   // const [stayType, setStayType] = useState<any>()

@@ -59,6 +59,9 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ }) => {
 	//
 
 	let [isOpenModalAmenities, setIsOpenModalAmenities] = useState(false)
+	const[cleaningFee, setCleaningFee] = useState<any>(0)
+	const[securityFee, setSecurityFee] = useState<any>(0)
+	const[weekendPrice, setWeekendPrice] = useState<any>(0)
 	const [listingDetail, setListingDetail] = useState<any>({})
 	const [daysToStay, setDaysToStay] = useState<number>(1)
 	const [totalFee, setTotalFee] = useState<number>(0)
@@ -68,6 +71,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ }) => {
 	const [roomPrice, setRoomPrice] = useState<number>(0)
 	const [selectedRooms, setSelectedRooms] = useState<any[]>([]);
 	const [propertyDates, setPropertyDates] = useState<any>([]);
+	const [adjustedNightPrice, setAdjustedNightPrice] = useState<number>(0);
 	const [currentActiveRoom, setCurrentActiveRoom] = useState<any>({
 		type: '',
 		count: 1,
@@ -82,6 +86,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ }) => {
 	const [convenienceFee, setConvenienceFee] = useState<any>()
 	const [gst, setGst] = useState<any>()
 	const [workationDiscount, setWorkationDiscount] = useState<any>(0)
+	const [discountWorkation, setDiscountWorkation] = useState<any>(0);
 	const [guestAdultsInputValue, setGuestAdultsInputValue] = useState(0)
 	const [guestChildrenInputValue, setGuestChildrenInputValue] = useState<number>(0);
 	const [guestInfantsInputValue, setGuestInfantsInputValue] = useState(0)
@@ -93,6 +98,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ }) => {
 	const [totalPrice, setTotalPrice] = useState<number>(0);
 	const [propertiesPhotos, setPropertiesPhotos] = useState<any[]>([]);
 	const [isModalOpen, setIsModalOpen] = useState(false);
+	const [discountPercentage, setDiscountPercentage] = useState<number>(0);
     const getRoomPrice = (currentActiveRoom: any) => {
 		const price = listingDetail?.rooms?.find((room: any) => room?.room_type?.name.toLowerCase() === currentActiveRoom?.toLowerCase())?.room_price
 		return price;
@@ -207,25 +213,54 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ }) => {
 	//   };
 
 			{/*Calendar Price total*/}
+			// const getDateRange = (start: Date, end: Date): string[] => {
+			// const dates: string[] = [];
+			// let current = new Date(start);
+			// while (current <= end) {
+			// 	dates.push(current.toISOString().split("T")[0]);
+			// 	current.setDate(current.getDate() + 1);
+			// }
+			// return dates;
+			// };
+			// const getAveragePriceAdjustment = (selectedDates: string[], propertyDates: any[]) => {
+			// const matched = propertyDates.filter((pd) => selectedDates.includes(pd.date));
+			// const totalPercent = matched.reduce((sum, pd) => sum + (pd.price || 0), 0);
+			// const average = matched.length ? totalPercent / matched.length : 0;
+			// return average;
+			// };
+			// const selectedDates: string[] = startDate && endDate
+			// 	? getDateRange(startDate, endDate)
+			// 	: [];
+			// const priceAdjustmentPercent = getAveragePriceAdjustment(selectedDates, propertyDates);
+
 			const getDateRange = (start: Date, end: Date): string[] => {
-			const dates: string[] = [];
-			let current = new Date(start);
-			while (current <= end) {
-				dates.push(current.toISOString().split("T")[0]);
-				current.setDate(current.getDate() + 1);
-			}
-			return dates;
-			};
-			const getAveragePriceAdjustment = (selectedDates: string[], propertyDates: any[]) => {
-			const matched = propertyDates.filter((pd) => selectedDates.includes(pd.date));
-			const totalPercent = matched.reduce((sum, pd) => sum + (pd.price || 0), 0);
-			const average = matched.length ? totalPercent / matched.length : 0;
-			return average;
-			};
-			const selectedDates: string[] = startDate && endDate
-				? getDateRange(startDate, endDate)
-				: [];
-			const priceAdjustmentPercent = getAveragePriceAdjustment(selectedDates, propertyDates);
+					const dates: string[] = [];
+					let current = new Date(start);
+
+				
+					while (current < end) {
+						dates.push(current.toISOString().split("T")[0]);
+						current.setDate(current.getDate() + 1);
+					}
+
+					return dates;
+					};
+
+
+				const getRoomCalendarBasedTotal = (
+					room: any,
+					selectedDates: string[],
+					propertyDates: { date: string; price: number }[]
+					) => {
+					return selectedDates.reduce((sum, dateStr) => {
+						const day = propertyDates.find(d => d.date === dateStr);
+						const pricePercent = day?.price ?? 0;
+						const adjustedPrice = room.room_price + (room.room_price * pricePercent / 100);
+						return sum + adjustedPrice * room.count;
+					}, 0);
+					};
+
+
 			{/*End Calendar Price total*/}
 	useEffect(() => {
 		calculateTotalFee()
@@ -305,6 +340,12 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ }) => {
 					accommodates: room?.accommodates,
 					total_accommodates: room?.total_accommodates,
 					guest_fee: room?.room_pricing[0]?.guest_fee,
+					weekly_discount: room?.room_pricing[0]?.weekly_discount,
+					cleaning_fee: room?.room_pricing[0]?.cleaning_fee,
+					security_fee: room?.room_pricing[0]?.security_fee,
+					weekend_price: room?.room_pricing[0]?.weekend_price,
+					fortnight_discount: room?.room_pricing[0]?.fortnight_discount,
+					monthly_discount: room?.room_pricing[0]?.monthly_discount,
 					total_rooms: 1,
 					roomid: room.id,
 					guest_after: room?.room_pricing[0]?.guest_after,
@@ -380,6 +421,118 @@ useEffect(() => {
     handleErrorMessageDisplay(() => {});
   }
 }, [guestAdultsInputValue, guestChildrenInputValue, extraGuest, numberOfRoomSelected, currentActiveRoom, handleErrorMessageDisplay]);
+
+// useEffect(() => {
+// 		let grossSum = 0;
+// 		let discountSum = 0;
+// 		 if (!selectedRooms || selectedRooms.length === 0) {
+// 				setCleaningFee(0);
+// 				setSecurityFee(0);
+// 				setWeekendPrice(0);
+// 				return;
+// 			}
+// 		selectedRooms.forEach((room) => {
+// 			const baseNightlyPrice = room.room_price;
+// 			const adjustment = baseNightlyPrice * priceAdjustmentPercent / 100;
+// 			const adjustedNightlyPrice = baseNightlyPrice + adjustment;
+			
+// 				let discountPercent = 0;
+// 				if (daysToStay >= 30 && room?.monthly_discount > 0) {
+// 				discountPercent = room.monthly_discount;
+// 				} else if (daysToStay >= 15 && room?.fortnight_discount > 0) {
+// 				discountPercent = room.fortnight_discount;
+// 				} else if (daysToStay >= 7 && room?.weekly_discount > 0) {
+// 				discountPercent = room.weekly_discount;
+// 				}
+
+// 				const gross = adjustedNightlyPrice * room.count * daysToStay;
+// 				//console.log("gross:", gross, "adjustedNightlyPrice:", adjustedNightlyPrice, "room.count:", room.count, "daysToStay:", daysToStay, "discountPercent:", discountPercent);
+// 				const discount = (gross * discountPercent) / 100;
+// 				const final = gross - discount;
+//                 //console.log("room:", room, "adjustedNightlyPrice:", adjustedNightlyPrice, "gross:", gross, "discount:", discount, "final:", final);
+// 				grossSum += final;
+// 				discountSum += discount;
+// 				setDiscountPercentage(discountPercent); 
+// 				setAdjustedNightPrice(adjustedNightlyPrice);
+// 			});
+// 				const cleaning = selectedRooms.reduce(
+// 					(sum, room) => sum + ((room.cleaning_fee || 0) * (room.count || 1)),
+// 					0
+// 				);
+
+// 				const security = selectedRooms.reduce(
+// 					(sum, room) => sum + ((room.security_fee || 0) * (room.count || 1)),
+// 					0
+// 				);
+
+// 				const weekend = selectedRooms.reduce(
+// 					(sum, room) => sum + ((room.weekend_price || 0) * (room.count || 1)),
+// 					0
+// 				);
+// 		setWorkationDiscount(discountSum);      
+// 		setTotalPrice(grossSum); 
+// 		setCleaningFee(cleaning);
+// 		setSecurityFee(security);
+// 		setWeekendPrice(weekend); 
+		              
+// 		}, [selectedRooms, daysToStay, priceAdjustmentPercent]);
+
+			useEffect(() => {
+			let grossSum = 0;
+			let discountSum = 0;
+
+			if (!selectedRooms || selectedRooms.length === 0) {
+				setCleaningFee(0);
+				setSecurityFee(0);
+				setWeekendPrice(0);
+				return;
+			}
+
+			const selectedDates: string[] = startDate && endDate
+				? getDateRange(startDate, endDate)
+				: [];
+
+			selectedRooms.forEach((room) => {
+				const roomTotal = getRoomCalendarBasedTotal(room, selectedDates, propertyDates);
+
+				// Discount logic
+				let discountPercent = 0;
+				if (daysToStay >= 30 && room.monthly_discount > 0) {
+				discountPercent = room.monthly_discount;
+				} else if (daysToStay >= 15 && room.fortnight_discount > 0) {
+				discountPercent = room.fortnight_discount;
+				} else if (daysToStay >= 7 && room.weekly_discount > 0) {
+				discountPercent = room.weekly_discount;
+				}
+				setDiscountPercentage(discountPercent);
+				const discountAmount = (roomTotal * discountPercent) / 100;
+				const finalRoomPrice = roomTotal - discountAmount;
+
+				grossSum += finalRoomPrice;
+				discountSum += discountAmount;
+			});
+
+			// Additional Fees
+			const cleaning = selectedRooms.reduce(
+				(sum, room) => sum + ((room.cleaning_fee || 0) * (room.count || 1)),
+				0
+			);
+			const security = selectedRooms.reduce(
+				(sum, room) => sum + ((room.security_fee || 0) * (room.count || 1)),
+				0
+			);
+			const weekend = selectedRooms.reduce(
+				(sum, room) => sum + ((room.weekend_price || 0) * (room.count || 1)),
+				0
+			);
+
+			setWorkationDiscount(discountSum);      
+			setTotalPrice(grossSum); 
+			setCleaningFee(cleaning);
+			setSecurityFee(security);
+			setWeekendPrice(weekend);
+			}, [selectedRooms, startDate, endDate, propertyDates]);
+
 
 
 	const renderSection1 = ({ result }: any) => {
@@ -1019,6 +1172,7 @@ useEffect(() => {
 
 	const renderSidebar = ({ result }: any) => {
 		const roomOrder = ["Classic", "Superior", "Premium"];
+		console.log("selectRoomsTest:", selectedRooms);
 		return (
 			<div className="listingSectionSidebar__wrap shadow-xl mt-[6rem] sm:mt-0 cstm-padding">
 				{/* PRICE */}
@@ -1065,115 +1219,146 @@ useEffect(() => {
 				{	
 					roomPrice !== 0 &&
 					<div className="flex flex-col space-y-1 mt-3">
-						{/* {selectedRooms.length > 0 && (
-						<div className="flex flex-col space-y-1 text-neutral-600 dark:text-neutral-300">
-							{selectedRooms
-							.slice()
-							.sort((a, b) => {
-								const indexA = roomOrder.indexOf(a.type);
-								const indexB = roomOrder.indexOf(b.type);
-								return (indexA === -1 ? 999 : indexA) - (indexB === -1 ? 999 : indexB);
-							})
-							.map((room, index) => {
-								const priceAdjustment = propertyDates?.[0]?.price || 0;
-								const adjustedNightlyPrice = room.room_price + (room.room_price * priceAdjustment / 100);
-								const total = adjustedNightlyPrice * room.count * daysToStay;
-
-								return (
-								<div key={index} className="flex justify-between">
-									<span>
-									₹{adjustedNightlyPrice.toFixed(0)}
-									<span className="text-xs">/night</span>{" "}
-									{room.space_type !== 8 ? room.type : ""} (
-									{room.count}{" "}
-									<span className="text-xs">
-										{room.space_type === 8 ? "Person" : "room"}
-									</span>{" "}
-									x {daysToStay.toFixed(0)}{" "}
-									<span className="text-xs">day</span>)
-									</span>
-									<span>
-									₹{total.toFixed(0)}
-									</span>
-								</div>
-								);
-							})}
-						</div>
-						)} */}
-								{selectedRooms.length > 0 && (
-								<div className="flex flex-col space-y-1 text-neutral-600 dark:text-neutral-300">
-									{selectedRooms
-									.slice()
-									.sort((a, b) => {
-										const indexA = roomOrder.indexOf(a.type);
-										const indexB = roomOrder.indexOf(b.type);
-										return (indexA === -1 ? 999 : indexA) - (indexB === -1 ? 999 : indexB);
-									})
-									.map((room, index) => {
-										const adjustedNightlyPrice =
-										room.room_price + (room.room_price * priceAdjustmentPercent) / 100;
-
-										const total = adjustedNightlyPrice * room.count * daysToStay;
-
-										return (
-										<div key={index} className="flex justify-between items-center">
-											<span>
-											₹{adjustedNightlyPrice.toFixed(0)}
-											<span className="text-xs">/night</span>{" "}
-											{room.space_type !== 8 ? room.type : ""} (
-											{room.count}{" "}
-											<span className="text-xs">
-												{room.space_type === 8 ? "Person" : "room"}
-											</span>{" "}
-											x {daysToStay.toFixed(0)}{" "}
-											<span className="text-xs">day</span>)
-											{/* {priceAdjustmentPercent > 0 && (
-												<span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-green-100 text-green-700">
-												+{priceAdjustmentPercent}% price
-												</span>
-											)} */}
-											</span>
-											<span>₹{total.toFixed(0)}</span>
-										</div>
-										);
-									})}
-								</div>
-								)}
-
-
-					
-{/* 
-					{selectedRooms.length > 0 && (
+						
+						{selectedRooms.length > 0 && (
 							<div className="flex flex-col space-y-1 text-neutral-600 dark:text-neutral-300">
 								{selectedRooms
-								.slice() // clone the array to avoid mutating state
+								.slice()
 								.sort((a, b) => {
 									const indexA = roomOrder.indexOf(a.type);
 									const indexB = roomOrder.indexOf(b.type);
-
-									// Items not in the list get pushed to the end
 									return (indexA === -1 ? 999 : indexA) - (indexB === -1 ? 999 : indexB);
 								})
-								.map((room, index) => (
-									<div key={index} className="flex justify-between">
-									<span>
-										₹ {room.room_price+(room.room_price * propertyDates?.price/100)}
-										<span className="text-xs">/night</span>{" "}
-										{room.space_type !== 8 ? room.type : ""} (
-										{room.count}{" "}
-										<span className="text-xs">
-										{room.space_type === 8 ? "Person" : "room"}
-										</span>{" "}
-										x {daysToStay.toFixed(0)}{" "}
-										<span className="text-xs">day</span>)
-									</span>
-									<span>
-										₹{((room.room_price+(room.room_price * propertyDates?.price/100)) * room.count * daysToStay).toFixed(0)}
-									</span>
+								.map((room, index) => {
+									const selectedDates: string[] = startDate && endDate ? getDateRange(startDate, endDate) : [];
+
+									// Group adjusted price by percent
+									const priceMap = new Map<number, number>(); // adjusted price => days count
+
+									selectedDates.forEach(date => {
+									const pd = propertyDates.find((p:any)=> p.date === date);
+									const pricePercent = pd?.price ?? 0;
+									const adjusted = room.room_price + (room.room_price * pricePercent / 100);
+									const key = Math.round(adjusted); // group similar prices
+									priceMap.set(key, (priceMap.get(key) || 0) + 1);
+									});
+
+									const groups = Array.from(priceMap.entries()).map(([adjusted, days]) => ({
+									adjusted,
+									days,
+									total: adjusted * room.count * days
+									}));
+
+									// Discount logic
+									let discountPercent = 0;
+									if (daysToStay >= 30 && room.monthly_discount > 0) {
+									discountPercent = room.monthly_discount;
+									} else if (daysToStay >= 15 && room.fortnight_discount > 0) {
+									discountPercent = room.fortnight_discount;
+									} else if (daysToStay >= 7 && room.weekly_discount > 0) {
+									discountPercent = room.weekly_discount;
+									}
+									
+									const grossTotal = groups.reduce((sum, g) => sum + g.total, 0);
+									const discountAmount = (grossTotal * discountPercent) / 100;
+
+									return (
+									<div key={index}>
+										{groups.map((g, idx) => (
+										<div key={idx} className="flex justify-between items-center">
+											<span>
+											₹{g.adjusted}/night {room.type} ({room.count}{" "}
+											<span className="text-xs">
+												{room.space_type === 8 ? "Person" : "room"}
+											</span>{" "}
+											x {g.days} day)
+											</span>
+											<span>₹{g.total}</span>
+										</div>
+										))}
+
+										{discountPercent > 0 && (
+										<div className="flex justify-between items-center">
+											<span className="px-3 py-1 text-xs rounded-full bg-green-100 text-green-700">
+											{`Discount: ${discountPercent}%`}
+											</span>
+											<span>₹{discountAmount.toFixed(0)}</span>
+										</div>
+										)}
 									</div>
-								))}
+									);
+								})}
 							</div>
-							)} */}
+							)}
+
+
+						{/*		{selectedRooms.length > 0 && (
+									<div className="flex flex-col space-y-1 text-neutral-600 dark:text-neutral-300">
+										{selectedRooms
+										.slice()
+										.sort((a, b) => {
+											const indexA = roomOrder.indexOf(a.type);
+											const indexB = roomOrder.indexOf(b.type);
+											return (indexA === -1 ? 999 : indexA) - (indexB === -1 ? 999 : indexB);
+										})
+										.map((room, index) => {
+											
+											console.log("room test:", room);
+											const baseNightlyPrice = room.room_price;
+											const adjustmentFromDatePricing = baseNightlyPrice * priceAdjustmentPercent / 100;
+											const adjustedNightlyPrice = baseNightlyPrice + adjustmentFromDatePricing;
+
+											
+											let discountPercent = 0;
+											if (daysToStay >= 30 && room?.monthly_discount > 0) {
+											discountPercent = room.monthly_discount;
+											console.log("Monthly Discount Test:", room?.monthly_discount);
+											} else if (daysToStay >= 15 && room?.fortnight_discount > 0) {
+											discountPercent = room.fortnight_discount;
+											} else if (daysToStay >= 7 && room?.weekly_discount > 0) {
+											discountPercent = room.weekly_discount;
+											console.log("Weekly Discount Test:", discountPercent);
+											}
+
+											const grossTotal = adjustedNightlyPrice * room.count * daysToStay;
+											console.log("grossTotal:", grossTotal);
+											const discountAmount = (grossTotal * discountPercent) / 100;
+											
+											
+											return (<>
+											<div key={index} className="flex justify-between items-center">
+												<span>
+												₹{adjustedNightlyPrice.toFixed(0)}
+												<span className="text-xs">/night</span>{" "}
+												{room.space_type !== 8 ? room.type : ""} (
+												{room.count}{" "}
+												<span className="text-xs">
+													{room.space_type === 8 ? "Person" : "room"}
+												</span>{" "}
+												x {daysToStay.toFixed(0)}{" "}
+												<span className="text-xs">day</span>)
+											
+												</span>
+												<span>₹{grossTotal.toFixed(0)}</span>
+											</div>
+											
+												{discountPercent > 0 && (
+													<>
+													<div className="flex justify-between items-center">
+													<span className="px-3 py-1 text-xs rounded-full bg-green-100 text-green-700">
+														{`Discount: ${discountPercent}%`}
+													</span>
+													<span>₹{discountAmount.toFixed(0)}</span>
+													</div>
+													</>
+												)}
+												</>
+											);
+										})}
+									</div>
+									)} */}
+
+									
 
 						{/* <div className="flex justify-between text-neutral-600 dark:text-neutral-300">
 							<span>
@@ -1210,14 +1395,63 @@ useEffect(() => {
 										<span>₹{((extraGuest * currentActiveRoom?.guest_fee) * daysToStay).toFixed(0)}</span>
 									</div>
 									}
-							
+							{/* {selectedRooms?.length > 0 && (
+									<>
+										{selectedRooms[0]?.cleaning_fee > 0 && (
+										<div className="flex justify-between text-neutral-600 dark:text-neutral-300">
+											<span>Cleaning Fee</span>
+											<span>₹{selectedRooms[0].cleaning_fee}</span>
+										</div>
+										)}
+
+										{selectedRooms[0]?.security_fee > 0 && (
+										<div className="flex justify-between text-neutral-600 dark:text-neutral-300">
+											<span>Security Fee</span>
+											<span>₹{selectedRooms[0].security_fee}</span>
+										</div>
+										)}
+
+										{selectedRooms[0]?.weekend_price > 0 && (
+										<div className="flex justify-between text-neutral-600 dark:text-neutral-300">
+											<span>Weekend Price</span>
+											<span>₹{selectedRooms[0].weekend_price}</span>
+										</div>
+										)}
+									</>
+									)} */}
+						{selectedRooms?.length > 0 && (
+							<>
+								{cleaningFee > 0 && (
+								<div className="flex justify-between text-neutral-600 dark:text-neutral-300">
+									<span>Cleaning Fee</span>
+									<span>₹{cleaningFee}</span>
+								</div>
+								)}
+
+								{securityFee > 0 && (
+								<div className="flex justify-between text-neutral-600 dark:text-neutral-300">
+									<span>Security Fee</span>
+									<span>₹{securityFee}</span>
+								</div>
+								)}
+
+								{weekendPrice > 0 && (
+								<div className="flex justify-between text-neutral-600 dark:text-neutral-300">
+									<span>Weekend Price</span>
+									<span>₹{weekendPrice}</span>
+								</div>
+								)}
+							</>
+							)}
+
+
 						<div className="flex justify-between text-neutral-600 dark:text-neutral-300">
 							<span>Convenience Fee ({convenienceFee}%)</span>
 							<span>₹{((convenienceFee / 100) * surgedPrice).toFixed(0)}</span>
 						</div>
 						<div className="flex justify-between text-neutral-600 dark:text-neutral-300">
 							<span>GST ({gst}%)</span>
-							<span>₹{((surgedPrice + ((convenienceFee / 100) * surgedPrice)) * (gst / 100)).toFixed(0)}</span>
+							<span>₹{((surgedPrice + ((convenienceFee / 100) * surgedPrice)+cleaningFee+securityFee+weekendPrice) * (gst / 100)).toFixed(0)}</span>
 						</div>
 						{/* {surgedPrice - (roomPrice * daysToStay) > 0 && 
 						<div className="flex justify-between text-neutral-600 dark:text-neutral-300">
@@ -1245,7 +1479,7 @@ useEffect(() => {
 						<div className="border-b border-neutral-200 dark:border-neutral-700"></div>
 						<div className="flex justify-between font-semibold">
 							<span>Total</span>
-							<span className='flex'>₹<PriceCalculator totalPrice={totalPrice} setTotalPrice={setTotalPrice} extraGuest={extraGuest} extraGuestPrice={(currentActiveRoom?.guest_fee)*daysToStay} guestChildrenInputValue={guestChildrenInputValue} childrenPricePerHead={(currentActiveRoom?.rooms?.[0]?.space_type !==8 ? (currentActiveRoom?.guest_fee ?? 0) / 2 : (currentActiveRoom?.rooms?.[0]?.room_price ?? 0) / 2)*daysToStay} setWorkationDiscount={setWorkationDiscount} propertyType={listingDetail?.result?.property_type?.name} daysToStay={daysToStay.toFixed(2)} workStation={listingDetail?.WorkStation} startDate={startDate} endDate={endDate} normalFare={roomPrice} propertyDates={propertyDates} setSurgedPrice={setSurgedPrice} convenienceFee={convenienceFee} gst={gst} /></span>
+							<span className='flex'>₹<PriceCalculator  totalPrice={totalPrice} setTotalPrice={setTotalPrice} extraGuest={extraGuest} extraGuestPrice={(currentActiveRoom?.guest_fee)*daysToStay} guestChildrenInputValue={guestChildrenInputValue} childrenPricePerHead={(currentActiveRoom?.rooms?.[0]?.space_type !==8 ? (currentActiveRoom?.guest_fee ?? 0) / 2 : (currentActiveRoom?.rooms?.[0]?.room_price ?? 0) / 2)*daysToStay} setWorkationDiscount={setWorkationDiscount}  workationDiscount={workationDiscount}  propertyType={listingDetail?.result?.property_type?.name} daysToStay={daysToStay.toFixed(2)} workStation={listingDetail?.WorkStation} startDate={startDate} endDate={endDate} normalFare={roomPrice} propertyDates={propertyDates} setSurgedPrice={setSurgedPrice} convenienceFee={convenienceFee} gst={gst} cleaningFee={cleaningFee} securityFee={securityFee} weekendFee={weekendPrice}/></span>
 						</div>
 					</div>
 				}
@@ -1275,11 +1509,17 @@ useEffect(() => {
 					currentroomPrice={currentroomPrice}
 					numberOfRoomSelected={numberOfRoomSelected}
 					daysToStay={daysToStay}
+					discountPercentage={discountPercentage}
 					workationDiscount={workationDiscount}
 					surgedPrice={surgedPrice}
 					extraGuest={extraGuest}
 					currentActiveRoom={currentActiveRoom}
 					convenienceFee={convenienceFee}
+					adjustedNightPrice={adjustedNightPrice}
+					selectedRooms={selectedRooms}
+					cleaningFee={cleaningFee} 
+					securityFee={securityFee} 
+					weekendPrice={weekendPrice}
 					gst={gst}
 					roomPrice={roomPrice}
 					totalPrice={totalPrice}
@@ -1475,70 +1715,7 @@ useEffect(() => {
 
 
 														<form>
-															{/* <select
-																id="rooms"
-																className="bg-gray-50 w-full min-w-[9rem] my-2 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-[#111827] dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-															onChange={(e) => {
-																	const selectedValue = parseInt(e.target.value);
-																	const roomKey = item?.space_type; // Or use item.id or room_type as unique key
-
-																	let updatedRooms = [...selectedRooms];
-
-																	// Remove existing entry if any
-																	updatedRooms = updatedRooms.filter(r => r.space_type !== roomKey);
-
-																	if (selectedValue > 0) {
-																		const newRoom = {
-																			type: item?.room_type,
-																			count: selectedValue,
-																			accommodates: item?.accommodates,
-																			guest_fee: item?.guest_fee,
-																			room_price: item?.room_price,
-																			room_id: item?.id,
-																			space_type: item?.space_type
-																		};
-																		updatedRooms.push(newRoom);
-																	}
-
-																	setSelectedRooms(updatedRooms);
-
-																	// Calculate total price
-																	const total = updatedRooms.reduce((acc, room) => acc + room.room_price * room.count, 0);
-																	setRoomPrice(total);
-
-																	// Store in localStorage if needed
-																	localStorage.setItem("selectedRooms", JSON.stringify(updatedRooms));
-																	// Determine guest fee
-																	let updatedGuestFee = 0;
-																	// const totalRoomCount = updatedRooms.reduce((acc, room) => acc + room.count, 0);
-
-																	if (total === 1) {
-																		const singleRoom = updatedRooms.find(r => r.count === 1);
-																		updatedGuestFee = singleRoom?.guest_fee || 0;
-																	} else if (total > 1) {
-																		const guestFees = updatedRooms.flatMap(room => Array(room.count).fill(room.guest_fee));
-																		updatedGuestFee = Math.min(...guestFees);
-																	}
-
-																	setCurrentActiveRoom((prev: any)=> ({
-																		...prev,
-																		guest_fee: updatedGuestFee
-																	}));
-																}}
-
-															>
-																<option value='0' selected={currentActiveRoom.type !== item?.room_type}>
-																	Select {item?.room_type}
-																</option>
-																{[...Array(item?.total_rooms)].map((_, index) => {
-																	const value = index + 1;
-																	return (
-																		<option key={value} value={value}>
-																			{value} {item?.room_type}
-																		</option>
-																	);
-																})}
-															</select> */}
+													
 															<select
 															id="rooms"
 															className="bg-gray-50 w-full min-w-[9rem] my-2 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-[#111827] dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
@@ -1546,8 +1723,7 @@ useEffect(() => {
 																const selectedValue = parseInt(e.target.value);
 																const roomKey = item?.space_type;
 																
-																
-
+														
 																let updatedRooms = [...selectedRooms].filter(r => r.space_type !== roomKey);
 
 																if (selectedValue > 0) {
@@ -1559,7 +1735,14 @@ useEffect(() => {
 																	room_price: item?.room_price,
 																	room_id: item?.id,
 																	space_type: item?.space_type,
-																	guest_after: item?.guest_after,
+																	guest_after: item?.guest_after,																
+																	weekly_discount: item?.weekly_discount,
+																	security_fee: item?.security_fee,
+																	cleaning_fee: item?.cleaning_fee,
+																	weekend_price: item?.weekend_price,
+																	fortnight_discount: item?.fortnight_discount,
+																	monthly_discount: item?.monthly_discount,
+																	total_rooms: item?.total_rooms,
 																	total_accommodates: item?.total_accommodates,
 																};
 																updatedRooms.push(newRoom);

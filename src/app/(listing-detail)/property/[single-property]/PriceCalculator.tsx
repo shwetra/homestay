@@ -17,13 +17,16 @@ interface PriceCalculatorProps {
   daysToStay?: any;
   workStation?: any;
   setWorkationDiscount?: any;
+  workationDiscount?: any;
   guestChildrenInputValue?: number;
   childrenPricePerHead?: number;
   extraGuestPrice?: any;
   extraGuest?: any;
   totalPrice?: any;
   setTotalPrice?: any;
-
+  cleaningFee?: any;
+  securityFee?: any;  
+  weekendFee?: any;
 }
 
 const PriceCalculator = ({
@@ -32,12 +35,16 @@ const PriceCalculator = ({
   normalFare,
   propertyDates,
   setSurgedPrice,
-  convenienceFee, 
+  convenienceFee,
+  cleaningFee,
+  securityFee,
+  weekendFee,
   gst,
   daysToStay,
   propertyType,
   workStation,
   setWorkationDiscount,
+  workationDiscount,
   extraGuestPrice, extraGuest,
   totalPrice, setTotalPrice,
   guestChildrenInputValue,
@@ -60,15 +67,26 @@ const PriceCalculator = ({
         // If the date is found, apply the surged price
         if (surgeDate) {
           const surgedPrice = normalFare + ((surgeDate?.price / 100) * normalFare);
-          total += surgedPrice;
+          total += surgedPrice; // Apply workation discount if available
+          
         } else {
           total += normalFare; // Else, use the normal fare
+       
         }
 
         // Move to the next day
         currentDate.setDate(currentDate.getDate() + 1);
       }
-
+      if(propertyType === "Workation"){
+        total= total-workationDiscount
+        //console.log("propertyType::", propertyType, "Workation Discount::", workationDiscount, "Total::", total);
+      }
+      else{
+        total = total;
+         //console.log("propertyType::", propertyType, "Total::", total);
+      }
+      
+     // console.log("PropertyType::", propertyType, "Total::",total, "WorkStation ::", workStation, "Days toStay ::", daysToStay, "workationDiscount ::", workationDiscount);
       if(extraGuest > 0){
         const extraGuestFee = (extraGuest * extraGuestPrice)
         console.log("extrea gesut fee::" , extraGuestFee)
@@ -124,8 +142,10 @@ const PriceCalculator = ({
 
       // applying convenienceFee and gst 
       total = total + ((convenienceFee/100) * total)
+      total = total + cleaningFee + securityFee + weekendFee; 
+      console.log("gst Price:", (gst/100) * total);
       total = total + ((gst/100) * total)
-
+      
       setTotalPrice(Math.round(total)); // Set the total price after calculating
     };
 

@@ -7,6 +7,10 @@ interface ModalReserveMobileProps {
   renderChildren?: (p: { openModal: () => void }) => React.ReactNode;
   startDate?: any,
   endDate?: any,
+  selectedRooms?: any,
+  cleaningFee?: any,
+  securityFee?: any,
+  weekendPrice?: any,
   guestAdultsInputValue?: any,
   guestChildrenInputValue?: any,
   guestInfantsInputValue?: any,
@@ -14,8 +18,10 @@ interface ModalReserveMobileProps {
   numberOfRoomSelected?: any,
   daysToStay?: any,
   workationDiscount?: any,
+  adjustedNightPrice?: number,
   surgedPrice?: any,
   extraGuest?: any,
+  discountPercentage?: number,
   currentActiveRoom?: any,
   convenienceFee?: any,
   gst?: any,
@@ -27,8 +33,7 @@ interface ModalReserveMobileProps {
 
 const ModalReserveMobile: FC<ModalReserveMobileProps> = ({
   renderChildren, endDate, startDate, guestAdultsInputValue, guestChildrenInputValue, guestInfantsInputValue, currentroomPrice, numberOfRoomSelected, daysToStay,
-  workationDiscount, surgedPrice, extraGuest, currentActiveRoom, convenienceFee, gst, roomPrice, totalPrice, result
-}) => {
+  workationDiscount, surgedPrice, extraGuest, currentActiveRoom, convenienceFee, gst, roomPrice, totalPrice, result, discountPercentage, adjustedNightPrice, selectedRooms, cleaningFee,securityFee, weekendPrice}) => {
   const [showModal, setShowModal] = useState(false);
 
   //
@@ -87,14 +92,20 @@ const ModalReserveMobile: FC<ModalReserveMobileProps> = ({
                           guestAdultsInputValue={guestAdultsInputValue}
                           guestChildrenInputValue={guestChildrenInputValue}
                           guestInfantsInputValue={guestInfantsInputValue}
+                          selectedRooms={selectedRooms}
+                          cleaningFee={cleaningFee} 
+                          securityFee={securityFee}
+                          weekendPrice={weekendPrice}
                           currentroomPrice={currentroomPrice}
                           numberOfRoomSelected={numberOfRoomSelected}
                           daysToStay={daysToStay}
+                          discountPercentage={discountPercentage}
                           workationDiscount={workationDiscount}
                           surgedPrice={surgedPrice}
                           extraGuest={extraGuest}
                           currentActiveRoom={currentActiveRoom}
                           convenienceFee={convenienceFee}
+                          adjustedNightPrice={adjustedNightPrice}
                           gst={gst}
                           roomPrice={roomPrice}
                           totalPrice={totalPrice}
